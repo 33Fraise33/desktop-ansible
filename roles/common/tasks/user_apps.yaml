@@ -1,0 +1,74 @@
+- name: remove default apps
+  pacman:
+    name:
+      - okular
+      - skanlite
+      - konversation
+      - firefox
+      - kget
+      - thunderbird
+      - cantata
+      - k3b
+      - kate
+      - kcalc
+      - spectacle
+      - yakuake
+      - manjaro-browser-settings
+    state: absent
+  become: true
+
+- name: install user apps
+  aur:
+    name:
+      - atom
+      - chromium
+      - ansible
+      - remmina
+      - freerdp
+      - libvncserver
+      - vlc
+      - wireguard-tools
+      - teamviewer
+      - winbox
+      - ttf-ms-fonts
+      - slack-desktop
+      - teams
+      - telegram-desktop
+      - copyq
+      - google-earth-pro
+      - flameshot
+      - libreoffice
+      - gwenview
+      - ipscan
+      - discord
+      - wireshark-qt
+      - zoom
+      - obs-studio
+      - gparted
+      - qemu
+      - libvirt
+      - virt-manager
+      - bridge-utils
+      - ebtables
+      - dnsmasq
+      - libratbag
+      - piper
+      - barrier
+    state: latest
+
+- name: start & enable services
+  service:
+    name: "libvirtd"
+    state: started
+    enabled: yes
+  become: true
+
+# - name: add gpg key spotify
+#   shell: "{{ item }}"
+#   with_items:
+#     - curl -sS https://download.spotify.com/debian/pubkey.gpg | gpg --import -
+#     - gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 931FF8E79F0876134EDDBDCCA87FF9DF48BF1C90
+#
+# - name: install spotify
+#   aur:
+#     name: spotify

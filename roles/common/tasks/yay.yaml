@@ -1,0 +1,24 @@
+- name: install git & go (required for yay)
+  pacman:
+    name:
+      - git
+      - go
+    state: present
+  become: true
+
+- name: make git dir
+  file:
+    path: /home/{{ user.name }}/git
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+
+- name: clone yay git repo
+  git:
+    repo: https://aur.archlinux.org/yay.git
+    dest: /home/{{ user.name }}/git/yay
+
+- name: install yay
+  command: makepkg -si --noconfirm
+  args:
+    chdir: /home/{{ user.name }}/git/yay

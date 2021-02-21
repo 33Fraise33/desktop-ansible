@@ -1,0 +1,21 @@
+- hosts: common
+  gather_facts: False
+  tasks:
+  - name: install python 3 if needed
+    raw: test -e /usr/bin/python || (sudo pacman -S python --noconfirm)
+
+- hosts: common
+  roles:
+    - kewlfft.aur
+  tasks:
+    - include_role:
+        name: common
+      tags: always
+  vars:
+    new_hostname: 'T14-Fraise'
+    user:
+      name: gianni
+      full: 'Gianni Stubbe'
+      email: gianni.stubbe@citymesh.com
+      hostname: "Arch-VM-Test"
+      timezone: Europe/Brussels

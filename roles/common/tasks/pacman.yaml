@@ -1,0 +1,31 @@
+- name: Rank Arch mirrors
+  block:
+    - name: Install the pacman-contrib package (for rankmirrors)
+      pacman:
+        name:
+          - pacman-contrib
+        update_cache: yes
+    - name: Use rankmirrors to filter the fastest mirrors that support HTTPS
+      shell: rankmirrors -c Netherlands,Belgium,Germany -m rank -a -P https
+      args:
+        warn: false
+  become: true
+  tags:
+    - mirrors
+
+- name: copy pacman config
+  copy:
+    src: pacman.conf
+    dest: /etc/pacman.conf
+    owner: root
+    group: root
+    mode: 644
+  become: true
+
+- name: make sure system is up to date
+  pacman:
+    name:
+      - base
+      - base-devel
+    update_cache: yes
+  become: true

@@ -1,0 +1,105 @@
+- name: install graphical apps (mainly xorg & plasma/kde with themes)
+  aur:
+    name:
+      - xorg
+      - plasma
+      - plasma-wayland-session
+      - dolphin
+      - ark
+      - arc-kde-git
+      - papirus-icon-theme
+      - arc-gtk-theme
+      - ttf-google-sans
+      - latte-dock
+    state: present
+
+- name: enable sddm login
+  systemd:
+    name: sddm
+    enabled: yes
+  become: true
+
+# - name: set kde settings
+#   block:
+#     - name: set kde user keyboard layout
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/kxkbrc
+#         regexp: '^LayoutList='
+#         line: 'LayoutList={{ system_locale_keymap }}'
+#     - name: set system style
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/kdeglobals
+#         regexp: '{{ item.regexp }}'
+#         insertafter: '{{ item.insertafter }}'
+#         line: '{{ item.line }}'
+#         firstmatch: yes
+#       with_items:
+#         - { line: 'ColorScheme=ArcDark', insertafter: '^[General]', regexp: '^ColorScheme='}
+#         - { line: 'Name=Arc Dark', insertafter: '^ColorScheme', regexp: '^Name='}
+#         - { line: 'Theme=Papirus-Dark', insertafter: '^[Icons]', regexp: '^Theme='}
+#         - { line: 'SingleClick=false', insertafter: '^LookAndFeelPackage=', regexp: '^SingleClick='}
+#         - { line: 'TerminalApplication=terminator', insertafter: '^Name=Breeze Dark', regexp: '^TerminalApplication='}
+#         - { line: 'font=Google Sans,10,-1,5,50,0,0,0,0,0', insertafter: '^XftSubPixel=', regexp: '^font='}
+#         - { line: 'menuFont=Google Sans,10,-1,5,50,0,0,0,0,0', insertafter: '^font=', regexp: '^menuFont='}
+#         - { line: 'smallestReadableFont=Google Sans,8,-1,5,50,0,0,0,0,0', insertafter: '^shadeSortColumn=', regexp: '^smallestReadableFont='}
+#         - { line: 'toolBarFont=Google Sans,10,-1,5,50,0,0,0,0,0', insertafter: '^smallestReadableFont=', regexp: '^toolBarFont='}
+#         - { line: 'activeFont=Google Sans,10,-1,5,50,0,0,0,0,0', insertafter: '^activeBlend=', regexp: '^activeFont='}
+#     - name: enable night color
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/kwinrc
+#         regexp: '{{ item.regexp }}'
+#         insertafter: '{{ item.insertafter }}'
+#         line: '{{ item.line }}'
+#         firstmatch: yes
+#       with_items:
+#         - { line: 'Active=true', insertafter: '^[NightColor]', regexp: '^Active='}
+#         - { line: 'NightTemperature=2000', insertafter: '^LongitudeAuto=', regexp: '^NightTemperature='}
+#     - name: disable logout & shutdown confirmation
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/ksmserverrc
+#         regexp: '{{ item.regexp }}'
+#         insertafter: '{{ item.insertafter }}'
+#         line: '{{ item.line }}'
+#         firstmatch: yes
+#       with_items:
+#         - { line: 'confirmLogout=false', insertafter: '^[General]', regexp: '^confirmLogout='}
+#     - name: disable mouse acceleration
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/kcminputrc
+#         regexp: '{{ item.regexp }}'
+#         insertafter: '{{ item.insertafter }}'
+#         line: '{{ item.line }}'
+#         firstmatch: yes
+#       with_items:
+#         - { line: 'XLbInptAccelProfileFlat=true', insertafter: '^[Mouse]', regexp: '^XLbInptAccelProfileFlat='}
+#     - name: set user full name & email
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/emaildefaults
+#         regexp: '{{ item.regexp }}'
+#         insertafter: '{{ item.insertafter }}'
+#         line: '{{ item.line }}'
+#         firstmatch: yes
+#       with_items:
+#         - { line: 'EmailAddress={{ user.email }}', insertafter: '^[PROFILE_Default]', regexp: '^EmailAddress='}
+#         - { line: 'FullName={{ user.full }}', insertafter: '^EmailAddress=', regexp: '^FullName='}
+#     - name: set style in plasmarc
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/plasmarc
+#         regexp: '^name='
+#         insertafter: '^[Theme]'
+#         line: 'name=Arc-Dark'
+#     - name: set style in lockscreen
+#       lineinfile:
+#         dest: /home/{{ user.name }}/.config/kscreenlockerrc
+#         regexp: '^Theme='
+#         insertafter: '^[Greeter]'
+#         line: 'Theme=com.github.varlesh.arc-dark'
+#     - name: set style in sddm
+#       lineinfile:
+#         dest: /etc/sddm.conf.d/kde_settings.conf
+#         regexp: '{{ item.regexp }}'
+#         line: '{{ item.line }}'
+#       with_items:
+#         - { line: 'Current=breeze', regexp: '^Current='}
+#         - { line: 'CursorTheme=breeze_cursors', regexp: '^CursorTheme='}
+#       become: true

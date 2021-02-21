@@ -1,0 +1,6 @@
+[iso_install]
+arch_iso ansible_host=192.168.122.21 ansible_user=root ansible_ssh_pass=root
+
+[common]
+arch_vm ansible_host=192.168.122.22 ansible_user=gianni
+wsl ansible_host=172.25.55.150 ansible_user=gianni

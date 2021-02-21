@@ -1,0 +1,45 @@
+- name: install terminal apps
+  aur:
+    name:
+      - terminator
+      - zsh
+      - oh-my-zsh-git
+      - powerline-fonts-git
+      - vim
+      - htop
+      - neofetch
+      - ansible
+      - sipcalc
+      - speedtest-cli
+      - youtube-dl
+      - mactelnet
+      - lldpd
+      - ncdu
+      - picocom
+      - inetutils # telnet
+      - usbutils
+      - whois
+      - unzip
+      - streamlink
+      - bcal
+      - glances
+      - docker
+    state: latest
+
+- name: start & enable services
+  service:
+    name: "docker"
+    state: started
+    enabled: yes
+  become: true
+
+- name: setup oh-my-zsh
+  shell: /usr/share/oh-my-zsh/tools/install.sh --unattended
+  args:
+    creates: /home/{{ user.name }}/.oh-my-zsh
+
+- name: set default shell of user to zsh
+  user:
+    name: "{{ user.name }}"
+    shell: /bin/zsh
+  become: true

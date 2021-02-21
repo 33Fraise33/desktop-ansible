@@ -1,0 +1,45 @@
+- include_tasks:
+    file: system.yml
+    apply:
+      tags: system
+  tags: system
+
+- include_tasks:
+    file: pacman.yaml
+    apply:
+      tags: pacman
+  tags: pacman
+
+- include_tasks:
+    file: yay.yaml
+    apply:
+      tags: yay
+  tags: yay
+
+- name: upgrade system packages
+  aur:
+    upgrade: yes
+
+- include_tasks:
+    file: graphical.yaml
+    apply:
+      tags: graphical
+  tags: graphical
+
+- include_tasks:
+    file: terminal.yaml
+    apply:
+      tags: terminal
+  tags: terminal
+
+- include_tasks:
+    file: syncthing.yaml
+    apply:
+      tags: syncthing
+  tags: syncthing
+
+- include_tasks:
+    file: user_apps.yaml
+    apply:
+      tags: user_apps
+  tags: user_apps
