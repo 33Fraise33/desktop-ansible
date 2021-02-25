@@ -6,7 +6,7 @@
           - pacman-contrib
         update_cache: yes
     - name: Use rankmirrors to filter the fastest mirrors that support HTTPS
-      shell: rankmirrors -c Netherlands,Belgium,Germany -m rank -a -P https
+      shell: curl -s "https://archlinux.org/mirrorlist/?country=BE&country=FR&country=DE&country=NL&country=GB&protocol=https&ip_version=4&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
       args:
         warn: false
   become: true
@@ -22,10 +22,28 @@
     mode: 644
   become: true
 
-- name: make sure system is up to date
+- name: disable compression of makepkg (aur packages)
+  lineinfile:
+    dest: /etc/makepkg.conf
+    regexp: '^PKGEXT='
+    line: "PKGEXT='.pkg.tar'"
+  become: true
+
+- name: install git
   pacman:
     name:
-      - base
-      - base-devel
+      - git
     update_cache: yes
+    state: present
   become: true
+
+- name: install paru
+  aur:
+    use: makepkg
+    name: paru-bin
+    state: present
+
+- name: upgrade all packages
+  aur:
+    upgrade: yes
+  tags: upgrade

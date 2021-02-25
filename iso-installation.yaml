@@ -1,18 +1,3 @@
 - hosts: iso_install
-  tasks:
-    - include_role:
-        name: iso-installation
-  vars:
-    install_drive: /dev/vda
-    user:
-      name: gianni
-      password: !vault |
-            $ANSIBLE_VAULT;1.1;AES256
-            30353330663665373030376335656637616262313030336661373765653463616432626364313935
-            3131306637333836343062653439616639306363346134350a663639393339643034376563646136
-            36633963613661376637393966616366646461656661303538663132353538393261323330356466
-            3534616566636263390a663565323036663436646263613637383134366238336634656130393537
-            3133
-      pub_key_location: "{{ lookup('env', 'HOME') }}/.ssh/personal/gianniKey.pub"
-    hostname: "Arch-VM-Test"
-    timezone: Europe/Brussels
+  roles:
+    - iso-installation

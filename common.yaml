@@ -7,15 +7,4 @@
 - hosts: common
   roles:
     - kewlfft.aur
-  tasks:
-    - include_role:
-        name: common
-      tags: always
-  vars:
-    new_hostname: 'T14-Fraise'
-    user:
-      name: gianni
-      full: 'Gianni Stubbe'
-      email: gianni.stubbe@citymesh.com
-      hostname: "Arch-VM-Test"
-      timezone: Europe/Brussels
+    - common

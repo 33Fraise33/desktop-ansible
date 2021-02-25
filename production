@@ -1,5 +1,0 @@
-[iso_install]
-arch_iso ansible_host=172.16.50.13 ansible_user=root ansible_ssh_pass=root
-
-[common]
-t14_fraise ansible_host=172.16.50.13 ansible_user=gianni

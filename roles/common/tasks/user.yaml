@@ -1,0 +1,16 @@
+- name: Create user account
+  user:
+    name: "{{ user.name }}"
+    comment: "{{ user.full }}"
+    groups: wheel
+    append: yes
+    shell: /bin/bash
+    password: "{{ user.password | string | password_hash('sha512') }}"
+    update_password: on_create
+  become: true
+
+- name: set authorized_keys
+  authorized_key:
+    user: "{{ user.name }}"
+    state: present
+    key: "{{ lookup('file', user.pub_key_location) }}"

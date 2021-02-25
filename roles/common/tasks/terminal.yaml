@@ -1,29 +1,46 @@
 - name: install terminal apps
   aur:
     name:
-      - terminator
-      - zsh
-      - oh-my-zsh-git
-      - powerline-fonts-git
-      - vim
-      - htop
-      - neofetch
+      - android-tools # adb & fastboot
       - ansible
-      - sipcalc
-      - speedtest-cli
-      - youtube-dl
-      - mactelnet
-      - lldpd
-      - ncdu
-      - picocom
-      - inetutils # telnet
-      - usbutils
-      - whois
-      - unzip
-      - streamlink
-      - bcal
-      - glances
+      - bridge-utils # for virt-manager & gns3
       - docker
+      - dmidecode # bios info
+      - fping # fping -g 172.16.50.0/24
+      - fwupd # fwupdmgr get-devices
+      - glances # glances (htop replacement)
+      - htop
+      - inetutils # telnet
+      - iperf3
+      - lldpd
+      - mactelnet # mndp
+      - modemmanager # for connecting modems
+      - mtr # my traceroute
+      - ncdu # storage info
+      - neofetch # pretty sys info
+      - nmap # portscans
+      - oh-my-zsh-git # zsh themes
+      - paru-bin # aur helper
+      - picocom # serial client
+      - powerline-fonts-git # fonts for terminator
+      - powertop # info on powerusage
+      - qemu # vm platform
+      - sipcalc # sipcalc 172.21.142.64/28
+      - speedtest-cli # speedtest in terminal
+      - sshpass # used for ansible
+      - streamlink # get livestreams in VLC or other client
+      - syncthing # sync config files
+      - terminator # terminal emulator
+      - tlp # battery life optimizations (install and forget)
+      - unzip
+      - usbutils # lsusb
+      - vim
+      - wget
+      - whois # info on domain owner
+      - wireguard-tools # used to create wireguard tunnel
+      - wpa_supplicant # use for wifi connection
+      - youtube-dl # download videos from the net
+      - zsh # shell
     state: latest
 
 - name: start & enable services

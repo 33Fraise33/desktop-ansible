@@ -5,6 +5,14 @@
     validate: /usr/sbin/visudo --check --file=%s
   become: true
 
+- name: install ntp & ssh
+  pacman:
+    name:
+      - ntp
+      - openssh
+    update_cache: yes
+  become: true
+
 - name: start & enable services
   service:
     name: "{{ item }}"
@@ -28,19 +36,12 @@
     name:
       - amd-ucode
     update_cache: yes
-  when: ansible_processor[1].find('Amd') != -1
-  become: true
-
-- name: disable compression of makepkg (aur packages)
-  lineinfile:
-    dest: /etc/makepkg.conf
-    regexp: '^PKGEXT='
-    line: "PKGEXT='.pkg.tar'"
+  when: ansible_processor[1].find('AMD') != -1
   become: true
 
 - name: set hostname in file
   copy:
-    content: "{{ new_hostname }}"
+    content: "{{ hostname }}"
     dest: /etc/hostname
   become: true
 
@@ -48,5 +49,5 @@
   lineinfile:
     dest: /etc/hosts
     regexp: ^127.0.1.1
-    line: '127.0.1.1 {{ new_hostname }} {{ new_hostname }}.localdomain'
+    line: '127.0.1.1 {{ hostname }} {{ hostname }}.localdomain'
   become: true
