@@ -1,0 +1,50 @@
+- name: remove default apps
+  pacman:
+    name:
+      - okular
+      - skanlite
+      - konversation
+      - kget
+      - thunderbird
+      - cantata
+      - k3b
+      - kate
+      - kcalc
+      - spectacle
+      - yakuake
+      - manjaro-browser-settings
+    state: absent
+  become: true
+
+- name: install user apps
+  aur:
+    name:
+      - ark # archive manager
+      - atom # text editor
+      - barrier # network kvm software (mouse and keyboard over the network)
+      - chromium # webbrowser with working hardware acceleration
+      - copyq-git # use git version for wayland fixes
+      - discord # chat app for gamers
+      - dolphin # file explorer
+      - flameshot-git # screenshot tool ( use git as bin has not been updated a lot and wayland fixes)
+      - freerdp # needed for remmina rdp
+      - google-earth-pro # used for kmz's
+      - gparted # gui partition manager
+      - gwenview # picture viewer
+      - ipscan # angry ip scanner
+      - libratbag # service for piper
+      - libvncserver # needed for remmina vnc
+      - mpv # media player
+      - obs-studio # capture screens and devices
+      - piper # mouse setting utility
+      - pulseaudio-modules-bt # higher quality audio
+      - remmina # remote desktop solution for rdp, vnc,...
+      - slack-desktop # native slack app
+      - spotify # music duuuuh
+      - teams # native microsoft teams app
+      - teamviewer # remote desktop tool for support cases
+      - ttf-ms-fonts # ms fonts for winbox
+      - virt-manager # libvirt gui manager
+      - winbox # add winbox app (wine bottled)
+      - wireguard-tools # to enable wireguard connections
+      - wireshark-qt # packet capture gui

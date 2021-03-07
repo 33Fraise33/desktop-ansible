@@ -1,20 +1,28 @@
-- import_tasks: system.yml
+- import_tasks: 01-system.yml
   tags: system
 
-- import_tasks: user.yaml
+- import_tasks: 02-user.yaml
   tags: user
 
-- import_tasks: pacman.yaml
+- import_tasks: 03-pacman.yaml
   tags: pacman
 
-- import_tasks: terminal.yaml
+- name: upgrade all packages
+  aur:
+    upgrade: yes
+  tags: upgrade
+
+- import_tasks: 04-terminal.yaml
   tags: terminal
 
-# - import_tasks: graphical.yaml
-#   tags: graphical
-#
-# - import_tasks: syncthing.yaml
+- import_tasks: 05-graphical.yaml
+  tags: graphical
+
+- import_tasks: 06-user_apps.yaml
+  tags: user_apps
+
+# - import_tasks: 07-syncthing.yaml
 #   tags: syncthing
-#
-# - import_tasks: user_apps.yaml
-#   tags: user_apps
+
+- import_tasks: 08-printing.yml
+  tags: printing

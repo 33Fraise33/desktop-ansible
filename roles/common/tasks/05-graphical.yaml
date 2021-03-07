@@ -1,17 +1,19 @@
-- name: install graphical apps (mainly xorg & plasma/kde with themes)
+- name: install KDE apps
   aur:
     name:
-      - xorg
-      - plasma
-      - plasma-wayland-session
-      - dolphin
-      - ark
-      - arc-kde-git
-      - papirus-icon-theme
-      - arc-gtk-theme
-      - ttf-google-sans
-      - latte-dock
-    state: present
+      - arc-gtk-theme # arc gtk theme (arc dark)
+      - arc-kde-git # arc theme (arc dark)
+      - latte-dock # better plasma dock
+      - papirus-icon-theme # nice icons for arc
+      - plasma # kde / plasmashell
+      - plasma-wayland-session # wayland support for plasma
+      # - ttf-google-sans # google fond for system (ZIP DOWNLOAD NOT WORKING)
+      - xorg # display server
+
+- name: install sway apps
+  aur:
+    name:
+      - sway # tiling DE
 
 - name: enable sddm login
   systemd:

@@ -1,0 +1,6 @@
+- name: restart cups
+  systemd:
+    state: restarted
+    name: cups
+    enabled: yes
+  become: true

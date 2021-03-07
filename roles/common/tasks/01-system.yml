@@ -5,7 +5,7 @@
     validate: /usr/sbin/visudo --check --file=%s
   become: true
 
-- name: install ntp & ssh
+- name: install & update ntp & ssh
   pacman:
     name:
       - ntp
@@ -18,7 +18,7 @@
     name: "{{ item }}"
     state: started
     enabled: yes
-  with_items:
+  loop:
     - ntpd
     - sshd
   become: true
@@ -26,7 +26,8 @@
 - name: Install intel-ucode
   pacman:
     name:
-      - intel-ucode
+      - intel-ucode # ucode for intel cpus
+      - vulkan-intel # vulkan support for intel gpu's
     update_cache: yes
   when: ansible_processor[1].find('Intel') != -1
   become: true
@@ -34,7 +35,9 @@
 - name: Install amd-ucode
   pacman:
     name:
-      - amd-ucode
+      - amd-ucode # ucode for amd
+      - vulkan-radeon # vulkan support for amd gpu's
+      - radeontop # radeon gpu info
     update_cache: yes
   when: ansible_processor[1].find('AMD') != -1
   become: true

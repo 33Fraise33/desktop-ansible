@@ -1,0 +1,12 @@
+- name: copy over lldp file for Konica Minolta Office Printer
+  copy:
+    src: KOC759UX.ppd
+    dest: /usr/share/cups/model/KOC759UX.ppd
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart cups
+  become: true
+
+- name: add office printer to system
+  command: lpadmin -p "Konica_Office" -E -v lpd://10.206.0.112/print -m KOC759UX.ppd

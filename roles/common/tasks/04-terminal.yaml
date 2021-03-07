@@ -2,16 +2,21 @@
   aur:
     name:
       - android-tools # adb & fastboot
-      - ansible
-      - bridge-utils # for virt-manager & gns3
+      - ansible # well you are running this playbook with it ¯\_(ツ)_/¯
+      - bmon # network interface monitoring
+      - bridge-utils # for libvirt & gns3
+      - cups # printing services
       - docker
       - dmidecode # bios info
+      - dnsmasq # needed for libvirt natting
+      - ebtables # needed for libvirt natting
       - fping # fping -g 172.16.50.0/24
       - fwupd # fwupdmgr get-devices
       - glances # glances (htop replacement)
       - htop
       - inetutils # telnet
       - iperf3
+      - libvirt # enhanced vm platform (running on top of qemu)
       - lldpd
       - mactelnet # mndp
       - modemmanager # for connecting modems
@@ -19,7 +24,7 @@
       - ncdu # storage info
       - neofetch # pretty sys info
       - nmap # portscans
-      - oh-my-zsh-git # zsh themes
+      - oh-my-zsh-git # zsh the way it should be
       - paru-bin # aur helper
       - picocom # serial client
       - powerline-fonts-git # fonts for terminator
@@ -41,19 +46,21 @@
       - wpa_supplicant # use for wifi connection
       - youtube-dl # download videos from the net
       - zsh # shell
-    state: latest
 
-- name: start & enable services
+- name: enable services
   service:
-    name: "docker"
-    state: started
+    name: "{{ item }}"
     enabled: yes
   become: true
+  loop:
+    - docker
+    - libvirtd
 
-- name: setup oh-my-zsh
-  shell: /usr/share/oh-my-zsh/tools/install.sh --unattended
-  args:
-    creates: /home/{{ user.name }}/.oh-my-zsh
+##### needed for a new install (already have .zshrc in syncthing)
+# - name: setup oh-my-zsh
+#   shell: /usr/share/oh-my-zsh/tools/install.sh --unattended
+#   args:
+#     creates: /home/{{ user.name }}/.oh-my-zsh
 
 - name: set default shell of user to zsh
   user:

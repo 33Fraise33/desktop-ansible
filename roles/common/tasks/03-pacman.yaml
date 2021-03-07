@@ -42,8 +42,3 @@
     use: makepkg
     name: paru-bin
     state: present
-
-- name: upgrade all packages
-  aur:
-    upgrade: yes
-  tags: upgrade

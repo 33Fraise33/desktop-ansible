@@ -33,7 +33,7 @@
   shell: '{{ item }}'
   args:
     warn: false
-  with_items:
+  loop:
     - 'ln -sf /home/{{ user.name}}/.dotfiles/.* /home/{{ user.name }}'
     - 'ln -sf /home/{{ user.name}}/.dotfiles/.config/* /home/{{ user.name}}/.config'
   ignore_errors: yes
