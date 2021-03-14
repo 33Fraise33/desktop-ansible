@@ -33,18 +33,30 @@
       - gwenview # picture viewer
       - ipscan # angry ip scanner
       - libratbag # service for piper
+      - libvirt # enhanced vm platform (running on top of qemu)
       - libvncserver # needed for remmina vnc
       - mpv # media player
       - obs-studio # capture screens and devices
       - piper # mouse setting utility
       - pulseaudio-modules-bt # higher quality audio
+      - qemu # vm platform
       - remmina # remote desktop solution for rdp, vnc,...
       - slack-desktop # native slack app
       - spotify # music duuuuh
+      - streamlink # get livestreams in VLC or other client
       - teams # native microsoft teams app
       - teamviewer # remote desktop tool for support cases
+      - terminator # terminal emulator
       - ttf-ms-fonts # ms fonts for winbox
       - virt-manager # libvirt gui manager
       - winbox # add winbox app (wine bottled)
       - wireguard-tools # to enable wireguard connections
       - wireshark-qt # packet capture gui
+
+- name: enable services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+  become: true
+  loop:
+    - libvirtd

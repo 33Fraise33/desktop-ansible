@@ -8,9 +8,40 @@
     password: "{{ user.password | string | password_hash('sha512') }}"
     update_password: on_create
   become: true
+  tags: arm_setup
 
 - name: set authorized_keys
   authorized_key:
     user: "{{ user.name }}"
     state: present
     key: "{{ lookup('file', user.pub_key_location) }}"
+  become: true
+  tags: arm_setup
+
+- name: change ssh configs
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  become: true
+  with_items:
+    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no'}
+    - { regexp: '^UsePAM ', line: 'UsePAM no'}
+    - { regexp: '^PasswordAuthentication ', line: 'PasswordAuthentication no'}
+  notify:
+    - restart sshd
+  tags: arm_setup
+
+- name: remove alarm user on arm arch
+  user:
+    name: "alarm"
+    state: absent
+    remove: yes
+    force: yes
+  become: true
+
+- name: update root account password (when running from arm arch root account has default password)
+  user:
+    name: "root"
+    password: "{{ user.password | string | password_hash('sha512') }}"
+  become: true

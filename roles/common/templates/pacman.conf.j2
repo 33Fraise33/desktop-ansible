@@ -19,7 +19,7 @@ HoldPkg     = pacman glibc
 #XferCommand = /usr/bin/curl -L -C - -f -o %o %u
 #XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u
 #CleanMethod = KeepInstalled
-Architecture = auto
+Architecture = {% if ansible_architecture == "aarch64" %} aarch64 {% else %} auto {% endif %}
 
 # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
 #IgnorePkg   =
@@ -77,20 +77,19 @@ Include = /etc/pacman.d/mirrorlist
 [extra]
 Include = /etc/pacman.d/mirrorlist
 
-#[community-testing]
-#Include = /etc/pacman.d/mirrorlist
-
 [community]
 Include = /etc/pacman.d/mirrorlist
 
-# If you want to run 32 bit applications on your x86_64 system,
-# enable the multilib repositories as required here.
+{% if ansible_architecture == "aarch64" %}
+[alarm]
+Include = /etc/pacman.d/mirrorlist
 
-#[multilib-testing]
-#Include = /etc/pacman.d/mirrorlist
-
+[aur]
+Include = /etc/pacman.d/mirrorlist
+{% else %}
 [multilib]
 Include = /etc/pacman.d/mirrorlist
+{% endif %}
 
 # An example of a custom package repository.  See the pacman manpage for
 # tips on creating your own repositories.

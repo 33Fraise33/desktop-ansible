@@ -1,5 +1,5 @@
 - import_tasks: 01-system.yml
-  tags: system
+  tags: system, arm_setup
 
 - import_tasks: 02-user.yaml
   tags: user
@@ -17,12 +17,15 @@
 
 - import_tasks: 05-graphical.yaml
   tags: graphical
+  when: ansible_architecture != "aarch64"
 
 - import_tasks: 06-user_apps.yaml
   tags: user_apps
+  when: ansible_architecture != "aarch64"
 
-# - import_tasks: 07-syncthing.yaml
-#   tags: syncthing
+- import_tasks: 07-syncthing.yaml
+  tags: syncthing
 
 - import_tasks: 08-printing.yml
   tags: printing
+  when: ansible_architecture != "aarch64"

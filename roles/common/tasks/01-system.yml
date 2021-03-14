@@ -1,3 +1,15 @@
+- name: install default packages
+  pacman:
+    name:
+      - sudo
+      - ntp
+      - openssh
+      - base
+      - base-devel
+      - networkmanager
+    update_cache: yes
+  become: true
+
 - name: Give passwordless sudo access to wheel group
   copy:
     content: '%wheel ALL=(ALL) NOPASSWD: ALL'
@@ -5,22 +17,26 @@
     validate: /usr/sbin/visudo --check --file=%s
   become: true
 
-- name: install & update ntp & ssh
-  pacman:
-    name:
-      - ntp
-      - openssh
-    update_cache: yes
+- name: sync time to ntp server
+  command: ntpdate -u pool.ntp.org
   become: true
 
 - name: start & enable services
-  service:
+  systemd:
     name: "{{ item }}"
     state: started
     enabled: yes
   loop:
     - ntpd
     - sshd
+    - NetworkManager
+  become: true
+
+- name: stop & disable networkd
+  systemd:
+    name: systemd-networkd
+    state: stopped
+    enabled: no
   become: true
 
 - name: Install intel-ucode
@@ -42,10 +58,9 @@
   when: ansible_processor[1].find('AMD') != -1
   become: true
 
-- name: set hostname in file
-  copy:
-    content: "{{ hostname }}"
-    dest: /etc/hostname
+- name: set hostname
+  hostname:
+    name: "{{ hostname }}"
   become: true
 
 - name: set hostname in hosts file
@@ -53,4 +68,14 @@
     dest: /etc/hosts
     regexp: ^127.0.1.1
     line: '127.0.1.1 {{ hostname }} {{ hostname }}.localdomain'
+  become: true
+
+- name: generate en_US locale
+  lineinfile:
+    dest: /etc/locale.gen
+    line: 'en_US.UTF-8 UTF-8'
+  become: true
+
+- name: generate locales
+  command: locale-gen
   become: true

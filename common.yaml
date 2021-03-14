@@ -1,8 +1,12 @@
-- hosts: common
+- hosts: all
   gather_facts: False
+  become: true
   tasks:
-  - name: install python 3 if needed
-    raw: test -e /usr/bin/python || (sudo pacman -S python --noconfirm)
+    - name: install python 3 if needed
+      raw: test -e /usr/bin/python || (pacman -S python --noconfirm)
+      changed_when: false
+  tags: always
+
 
 - hosts: common
   roles:

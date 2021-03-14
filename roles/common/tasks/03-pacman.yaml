@@ -12,10 +12,22 @@
   become: true
   tags:
     - mirrors
+  when: ansible_architecture != "aarch64"
+
+- name: create pacman mirrorlist for arm
+  copy:
+    dest: /etc/pacman.d/mirrorlist
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      Server = http://mirror.archlinuxarm.org/$arch/$repo
+  become: true
+  when: ansible_architecture == "aarch64"
 
 - name: copy pacman config
-  copy:
-    src: pacman.conf
+  template:
+    src: pacman.conf.j2
     dest: /etc/pacman.conf
     owner: root
     group: root
@@ -29,10 +41,11 @@
     line: "PKGEXT='.pkg.tar'"
   become: true
 
-- name: install git
+- name: install git & base-devel
   pacman:
     name:
       - git
+      - base-devel
     update_cache: yes
     state: present
   become: true

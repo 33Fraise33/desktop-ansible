@@ -16,7 +16,6 @@
       - htop
       - inetutils # telnet
       - iperf3
-      - libvirt # enhanced vm platform (running on top of qemu)
       - lldpd
       - mactelnet # mndp
       - modemmanager # for connecting modems
@@ -29,13 +28,10 @@
       - picocom # serial client
       - powerline-fonts-git # fonts for terminator
       - powertop # info on powerusage
-      - qemu # vm platform
       - sipcalc # sipcalc 172.21.142.64/28
       - speedtest-cli # speedtest in terminal
       - sshpass # used for ansible
-      - streamlink # get livestreams in VLC or other client
       - syncthing # sync config files
-      - terminator # terminal emulator
       - tlp # battery life optimizations (install and forget)
       - unzip
       - usbutils # lsusb
@@ -47,14 +43,23 @@
       - youtube-dl # download videos from the net
       - zsh # shell
 
+- name: change docker default subnet
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
 - name: enable services
-  service:
+  systemd:
     name: "{{ item }}"
+    state: restarted
     enabled: yes
   become: true
   loop:
     - docker
-    - libvirtd
 
 ##### needed for a new install (already have .zshrc in syncthing)
 # - name: setup oh-my-zsh

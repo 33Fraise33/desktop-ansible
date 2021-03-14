@@ -4,3 +4,10 @@
     name: cups
     enabled: yes
   become: true
+
+- name: restart sshd
+  systemd:
+    state: restarted
+    name: sshd
+    enabled: yes
+  become: true

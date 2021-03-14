@@ -1,14 +1,16 @@
 iso_install:
-  arch_iso:
-    ansible_host: 172.16.50.13
-    ansible_user: root
-    ansible_ssh_pass: root
-    install_drive: /dev/nvme0n1
+  hosts:
+    arch_iso:
+      ansible_host: 172.16.50.13
+      ansible_user: root
+      ansible_ssh_pass: root
+      install_drive: /dev/nvme0n1
 
 common:
-  t14_fraise:
-    ansible_host: 172.16.50.13
-    hostname: "T14-Fraise"
-  cm_rpi:
-    ansible_host: 192.168.33.2
-    hostname: "CM-RPI-Fraise"
+  hosts:
+    t14_fraise:
+      ansible_host: 172.16.50.13
+      hostname: "T14-Fraise"
+    cm_rpi:
+      ansible_host: 192.168.33.2
+      hostname: "CM-RPI-Fraise"

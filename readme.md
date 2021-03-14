@@ -21,7 +21,7 @@ Change the variables you want under iso-installation.yaml.
 - `timezone`: timezone to set on the host
 
 Run the playbook:
-`ansible-playbook -i hosts iso-installation.yaml`
+`ansible-playbook -i production.yaml iso-installation.yaml`
 
 *remarks*:
 - currently locale is hard set
@@ -32,6 +32,13 @@ Run the playbook:
 this relies on ansible-aur from the following repo: https://github.com/kewlfft/ansible-aur
 
 This should be runnable on most of the arch installs (works on arm as well). Items set in `iso-install` can be overridden for hosts that are maybe not provisioned with Ansible.
+
+### Running on Arch ARM
+When running on arch arm use the following method to run
+1) change the setting in `/etc/ssh/sshd_config` to `PermitRootLogin yes`
+(this will be undone in our playbook during the user setup)
+2) restart sshd `systemctl restart sshd`
+3) run: `ansible-playbook -i production.yaml common.yaml -e "ansible_user=alarm" --ask-pass --ask-become-pass --become-method su --tags arm_setup`
 
 ## WSL Prerequisites
 
