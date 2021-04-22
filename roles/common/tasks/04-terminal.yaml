@@ -9,7 +9,7 @@
       - docker
       - dmidecode # bios info
       - dnsmasq # needed for libvirt natting
-      - ebtables # needed for libvirt natting
+      - iptables-nft # needed for libvirt natting
       - fping # fping -g 172.16.50.0/24
       - fwupd # fwupdmgr get-devices
       - glances # glances (htop replacement)
@@ -43,15 +43,6 @@
       - youtube-dl # download videos from the net
       - zsh # shell
 
-- name: change docker default subnet
-  copy:
-    src: daemon.json
-    dest: /etc/docker/daemon.json
-    owner: root
-    group: root
-    mode: 0644
-  become: true
-
 - name: enable services
   systemd:
     name: "{{ item }}"
@@ -60,6 +51,16 @@
   become: true
   loop:
     - docker
+
+- name: change docker default subnet
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart docker
+  become: true
 
 ##### needed for a new install (already have .zshrc in syncthing)
 # - name: setup oh-my-zsh

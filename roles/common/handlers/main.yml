@@ -11,3 +11,10 @@
     name: sshd
     enabled: yes
   become: true
+
+- name: restart docker
+  systemd:
+    state: restarted
+    name: docker
+    enabled: yes
+  become: true
