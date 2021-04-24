@@ -39,9 +39,11 @@
     remove: yes
     force: yes
   become: true
+  tags: arm_setup
 
 - name: update root account password (when running from arm arch root account has default password)
   user:
     name: "root"
     password: "{{ user.password | string | password_hash('sha512') }}"
   become: true
+  tags: arm_setup

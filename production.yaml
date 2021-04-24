@@ -10,7 +10,10 @@ common:
   hosts:
     t14_fraise:
       ansible_host: 172.16.50.13
-      hostname: "T14-Fraise"
+      hostname: "Fraise-T14"
     cm_rpi:
       ansible_host: 192.168.33.2
-      hostname: "CM-RPI-Fraise"
+      hostname: "Fraise-RPI-CMB"
+    dad_rpi:
+      ansible_host: 172.16.50.132
+      hostname: "Fraise-RPI-Home"
