@@ -27,7 +27,7 @@
     state: started
     enabled: yes
   loop:
-    - ntpd
+    - systemd-timesyncd
     - sshd
     - NetworkManager
   become: true
