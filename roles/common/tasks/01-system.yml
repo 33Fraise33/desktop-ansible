@@ -58,6 +58,12 @@
   when: ansible_processor[1].find('AMD') != -1
   become: true
 
+- name: Install inetutils for hostname set
+  pacman:
+    name:
+      - inetutils
+  become: true
+
 - name: set hostname
   hostname:
     name: "{{ hostname }}"
