@@ -1,3 +1,11 @@
+- name: force remove iptables (conflicts with iptables-nft needed for libvirt)
+  pacman:
+    name:
+      - iptables
+    force: yes
+    state: absent
+  become: true
+
 - name: install terminal apps
   aur:
     name:
@@ -6,24 +14,24 @@
       - bmon # network interface monitoring
       - bridge-utils # for libvirt & gns3
       - cups # printing services
-      - docker
-      - docker-compose
+      - docker # apps containerized
+      - docker-compose # easy containerized file format
       - dmidecode # bios info
       - dnsmasq # needed for libvirt natting
       - iptables-nft # needed for libvirt natting
       - fping # fping -g 172.16.50.0/24
       - fwupd # fwupdmgr get-devices
       - glances # glances (htop replacement)
-      - htop
+      - htop # hardware usage/processes in cli
       - inetutils # telnet
-      - iperf3
-      - lldpd
+      - iperf3 # throughput tests
+      - lldpd # network discovery
       - mactelnet # mndp
       - modemmanager # for connecting modems
       - mtr # my traceroute
       - ncdu # storage info
       - neofetch # pretty sys info
-      - nmap # portscans
+      - nmap # portscans and much more
       - oh-my-zsh-git # zsh the way it should be
       - paru-bin # aur helper
       - picocom # serial client
@@ -34,10 +42,10 @@
       - sshpass # used for ansible
       - syncthing # sync config files
       - tlp # battery life optimizations (install and forget)
-      - unzip
+      - unzip # opisite of zip
       - usbutils # lsusb
-      - vim
-      - wget
+      - nvim # vim on steroids
+      - wget # get the www
       - whois # info on domain owner
       - wireguard-tools # used to create wireguard tunnel
       - wpa_supplicant # use for wifi connection
