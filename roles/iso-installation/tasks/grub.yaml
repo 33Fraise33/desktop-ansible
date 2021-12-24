@@ -1,0 +1,16 @@
+- name: setup grub for encryption
+  lineinfile:
+    dest: /mnt/etc/default/grub
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  loop:
+    - { regex: "^#?GRUB_ENABLE_CRYPTODISK", line: "GRUB_ENABLE_CRYPTODISK=y"}
+    - { regex: "^#?GRUB_CMDLINE_LINUX", line: 'GRUB_CMDLINE_LINUX="cryptdevice={{ install_drive }}2:cryptroot:allow-discards"'}
+    - { regex: "^#?GRUB_CMDLINE_LINUX_DEFAULT", line: 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3"'}
+  when: use_encryption
+
+- name: Install grub
+  command: arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+
+- name: Create grub config
+  command: arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg

@@ -1,0 +1,19 @@
+- name: setup ramdisk for btrfs
+  lineinfile:
+    dest: /mnt/etc/mkinitcpio.conf
+    regexp: ^BINARIES
+    line: 'BINARIES=(btrfs)'
+  when: use_btrfs
+  register: ramdisk1
+
+- name: setup ramdisk for disk encryption
+  lineinfile:
+    dest: /mnt/etc/mkinitcpio.conf
+    regexp: ^HOOKS=
+    line: 'HOOKS=(base udev autodetect modconf block encrypt filesystems keyboard fsck)'
+  when: use_encryption
+  register: ramdisk2
+
+- name: recreate ramdisk
+  command: arch-chroot /mnt mkinitcpio -p linux
+  when: ramdisk1.changed or ramdisk2.changed

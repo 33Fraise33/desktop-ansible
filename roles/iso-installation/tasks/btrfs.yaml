@@ -1,0 +1,38 @@
+- name: create root
+  command: btrfs subvolume create /mnt/{{ item }}
+  loop:
+    - "@"
+    - "@home"
+    - "@snapshots"
+
+- name: unmount /mnt
+  mount:
+    path: /mnt
+    state: unmounted
+
+- name: mount btrfs root subvolume
+  mount:
+    path: /mnt
+    src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+    fstype: btrfs
+    opts: "compress=zstd,subvol=@"
+    state: mounted
+
+- name: Create mountpoint for btrfs subvolumes
+  file:
+    path: /mnt/{{ item.path }}
+    state: directory
+  loop:
+    - { sub: '@snapshots', path: '.snapshots'}
+    - { sub: '@home', path: 'home'}
+    
+- name: mount btrfs subvolumes
+  mount:
+    path: /mnt/{{ item.path }}
+    src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+    fstype: btrfs
+    opts: "compress=zstd,subvol={{ item.sub }}"
+    state: mounted
+  loop:
+    - { sub: '@snapshots', path: '.snapshots'}
+    - { sub: '@home', path: 'home'}

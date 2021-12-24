@@ -11,106 +11,18 @@
 - name: Synchronize clock via NTP
   command: timedatectl set-ntp true
 
-- name: Wipe install drive and all its partitions
-  command: find /dev -wholename f"{{ install_drive }}*" -exec wipefs --force --all {} \;
+- import_tasks: partitions.yaml
+  tags: partitions
 
-- name: Create partitions
-  parted:
-    device: '{{ install_drive }}'
-    label: gpt
-    number: 1
-    part_end: 512MB
-    name: boot
-    flags: [boot, esp]
-    state: present
-
-- name: Create root partition
-  parted:
-    device: '{{ install_drive }}'
-    label: gpt
-    number: 2
-    part_start: 512MB
-    name: root
-    state: present
-
-- name: Create FAT32 filesystem in boot partition
-  filesystem:
-    dev: '{{ install_drive }}1'
-    fstype: vfat
-    opts: -F32
-    force: yes
-
-  # Luks1 as grub does not fully support Luks2 yet.
-- name: encrypt drive and mount it
-  block:
-    - name: copy passphrase encryption file
-      template:
-        src: crypt_password.j2
-        dest: /root/crypt_password
-        owner: "root"
-        group: "root"
-        mode: 0644
-    - name: encrypt drive
-      command: cryptsetup --batch-mode luksFormat --type luks1 {{ install_drive }}2 /root/crypt_password
-    - name: open encrypted drive
-      command: cryptsetup open {{ install_drive }}2 cryptroot --key-file /root/crypt_password
+- import_tasks: encryption.yaml
+  tags: encryption
   when: use_encryption
 
-- name: Create filesystem in root volume
-  filesystem:
-    dev: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
-    fstype: '{{ "btrfs" if use_btrfs else "ext4" }}'
-    opts: '-L ArchLinux'
-    force: yes
+- import_tasks: filesystem.yaml
+  tags: filesystem
 
-- name: Mount root filesystem
-  mount:
-    path: /mnt
-    src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
-    fstype: '{{ "btrfs" if use_btrfs else "ext4" }}'
-    state: mounted
-
-- name: create btrfs subvolumes
-  block:
-    - name: create root
-      command: btrfs subvolume create /mnt/@
-    - name: create home
-      command: btrfs subvolume create /mnt/@home
-    - name: create snapshots
-      command: btrfs subvolume create /mnt/@snapshots
-    - name: unmount /mnt
-      mount:
-        path: /mnt
-        state: unmounted
-    - name: mount btrfs subvolumes
-      mount:
-        path: /mnt
-        src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
-        fstype: btrfs
-        opts: "compress=zstd,subvol=@"
-        state: mounted
-    - name: Create mountpoint for home volume
-      file:
-        path: /mnt/home
-        state: directory
-    - name: Create mountpoint for snapshots volume
-      file:
-        path: /mnt/.snapshots
-        state: directory
-    - name: mount btrfs subvolumes
-      mount:
-        path: /mnt/home
-        src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
-        fstype: btrfs
-        opts: "compress=zstd,subvol=@home"
-        state: mounted
-    - name: mount btrfs subvolumes
-      mount:
-        path: /mnt/.snapshots
-        src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
-        fstype: btrfs
-        opts: "compress=zstd,subvol=@snapshots"
-        state: mounted
+- import_tasks: btrfs.yaml
+  tags: btrfs
   when: use_btrfs
 
 - name: Create mountpoint for boot volume
@@ -125,57 +37,16 @@
     fstype: vfat
     state: mounted
 
-- name: Rank Arch mirrors
-  block:
-    - name: Install the pacman-contrib package (for rankmirrors)
-      pacman:
-        name:
-          - pacman-contrib
-        update_cache: yes
-    - name: Use rankmirrors to filter the fastest mirrors that support HTTPS
-      shell: curl -s "https://archlinux.org/mirrorlist/?country=BE&country=FR&country=DE&country=NL&country=GB&protocol=https&ip_version=4&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
-      args:
-        warn: false
-
-- name: Run pacstrap
-  command: pacstrap /mnt base base-devel linux linux-firmware efibootmgr grub openssh sudo networkmanager btrfs-progs grub-btrfs
-  tags:
-    - pacstrap
-
-- name: install Intel microcode
-  command: arch-chroot /mnt pacman -S intel-ucode --noconfirm
-  when: ansible_processor[1].find('Intel') != -1
-
-- name: install AMD microcode
-  command: arch-chroot /mnt pacman -S amd-ucode --noconfirm
-  when: ansible_processor[1].find('AMD') != -1
+- import_tasks: install.yaml
+  tags: install
 
 - name: Generate fstab
   block:
     - name: Generate fstab file
       shell: genfstab -U /mnt > /mnt/etc/fstab
 
-- name: Set local timezone
-  command: arch-chroot /mnt ln -sf /usr/share/zoneinfo/{{ timezone }} /etc/localtime
-
-- name: Generate adjtime file
-  command: arch-chroot /mnt hwclock --systohc
-
-- name: Setup locales
-  block:
-    - name: Configure locale.gen
-      lineinfile:
-        dest: /mnt/etc/locale.gen
-        regexp: '{{ item.regex }}'
-        line: '{{ item.line }}'
-      loop:
-        - {regex: en_US\.UTF-8 UTF-8, line: en_US.UTF-8 UTF-8}
-    - name: Create locale.conf
-      copy:
-        content: "LANG=en_US.UTF-8"
-        dest: /mnt/etc/locale.conf
-    - name: Generate locales
-      command: arch-chroot /mnt locale-gen
+- import_tasks: local_time.yaml
+  tags: local_time
 
 - name: Enable NetworkManger for connectivity at boot
   command: arch-chroot /mnt systemctl enable NetworkManager
@@ -183,67 +54,14 @@
 - name: Enable sshd
   command: arch-chroot /mnt systemctl enable sshd
 
-- name: setup ramdisk for btrfs
-  lineinfile:
-    dest: /mnt/etc/mkinitcpio.conf
-    regexp: ^BINARIES
-    line: 'BINARIES=(btrfs)'
-  when: use_btrfs
-  register: ramdisk1
+- import_tasks: ramdisk.yaml
+  tags: ramdisk
 
-- name: setup ramdisk for disk encryption
-  lineinfile:
-    dest: /mnt/etc/mkinitcpio.conf
-    regexp: ^HOOKS=
-    line: 'HOOKS=(base udev autodetect modconf block encrypt filesystems keyboard fsck)'
-  when: use_encryption
-  register: ramdisk2
+- import_tasks: grub.yaml
+  tags: grub
 
-- name: recreate ramdisk
-  command: arch-chroot /mnt mkinitcpio -p linux
-  when: ramdisk1.changed or ramdisk2.changed
-
-- name: setup grub for encryption
-  lineinfile:
-    dest: /mnt/etc/default/grub
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-  loop:
-    - { regex: "^#?GRUB_ENABLE_CRYPTODISK", line: "GRUB_ENABLE_CRYPTODISK=y"}
-    - { regex: "^#?GRUB_CMDLINE_LINUX", line: 'GRUB_CMDLINE_LINUX="cryptdevice={{ install_drive }}2:cryptroot:allow-discards"'}
-    - { regex: "^#?GRUB_CMDLINE_LINUX_DEFAULT", line: 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3"'}
-  when: use_encryption
-
-- name: Install grub
-  command: arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
-
-- name: Create grub config
-  command: arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
-
-- name: Setup user account
-  block:
-    - name: Create user account
-      command: arch-chroot /mnt useradd -s /bin/bash -m --user-group -G wheel {{ user.name }}
-    - name: Create user password
-      command: arch-chroot /mnt sh -c 'echo {{ user.name }}:{{ user.password }} | chpasswd'
-    - name: Create user's ssh directory
-      file:
-        path: /mnt/home/{{ user.name }}/.ssh
-        state: directory
-        mode: 0700
-    - name: Copy over ssh key from current Ansible controller as an authorized key
-      copy:
-        src: "{{ user.pub_key_location }}"
-        dest: /mnt/home/{{ user.name }}/.ssh/authorized_keys
-        mode: 0600
-    - name: Set mode, owner, and group on user's authorized_key file
-      command: arch-chroot /mnt chown -R {{ user.name }}:{{ user.name }} /home/{{ user.name }}/.ssh/
-
-- name: Give passwordless sudo access to wheel group
-  copy:
-    content: '%wheel ALL=(ALL) NOPASSWD: ALL'
-    dest: /mnt/etc/sudoers.d/wheel
-    validate: /usr/sbin/visudo --check --file=%s
+- import_tasks: user.yaml
+  tags: user
 
 - name: Reboot
   reboot:

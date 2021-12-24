@@ -1,0 +1,22 @@
+- name: Install the pacman-contrib package (for rankmirrors)
+  pacman:
+    name:
+      - pacman-contrib
+    update_cache: yes
+- name: Use rankmirrors to filter the fastest mirrors that support HTTPS
+  shell: curl -s "https://archlinux.org/mirrorlist/?country=BE&country=FR&country=DE&country=NL&country=GB&protocol=https&ip_version=4&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
+  args:
+    warn: false
+    
+- name: Run pacstrap
+  command: pacstrap /mnt base base-devel linux linux-firmware efibootmgr grub openssh sudo networkmanager btrfs-progs grub-btrfs
+  tags:
+    - pacstrap
+
+- name: install Intel microcode
+  command: arch-chroot /mnt pacman -S intel-ucode --noconfirm
+  when: ansible_processor[1].find('Intel') != -1
+
+- name: install AMD microcode
+  command: arch-chroot /mnt pacman -S amd-ucode --noconfirm
+  when: ansible_processor[1].find('AMD') != -1

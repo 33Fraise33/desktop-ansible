@@ -1,0 +1,21 @@
+- name: Set local timezone
+  command: arch-chroot /mnt ln -sf /usr/share/zoneinfo/{{ timezone }} /etc/localtime
+
+- name: Generate adjtime file
+  command: arch-chroot /mnt hwclock --systohc
+
+- name: Configure locale.gen
+  lineinfile:
+    dest: /mnt/etc/locale.gen
+    regexp: '{{ item.regex }}'
+    line: '{{ item.line }}'
+  loop:
+    - {regex: en_US\.UTF-8 UTF-8, line: en_US.UTF-8 UTF-8}
+
+- name: Create locale.conf
+  copy:
+    content: "LANG=en_US.UTF-8"
+    dest: /mnt/etc/locale.conf
+    
+- name: Generate locales
+  command: arch-chroot /mnt locale-gen

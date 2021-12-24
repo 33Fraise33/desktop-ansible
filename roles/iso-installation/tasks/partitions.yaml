@@ -1,0 +1,28 @@
+- name: Wipe install drive and all its partitions
+  command: find /dev -wholename f"{{ install_drive }}*" -exec wipefs --force --all {} \;
+
+- name: Create partitions
+  parted:
+    device: '{{ install_drive }}'
+    label: gpt
+    number: 1
+    part_end: 512MB
+    name: boot
+    flags: [boot, esp]
+    state: present
+
+- name: Create root partition
+  parted:
+    device: '{{ install_drive }}'
+    label: gpt
+    number: 2
+    part_start: 512MB
+    name: root
+    state: present
+
+- name: Create FAT32 filesystem in boot partition
+  filesystem:
+    dev: '{{ install_drive }}1'
+    fstype: vfat
+    opts: -F32
+    force: yes
