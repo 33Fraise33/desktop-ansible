@@ -1,7 +1,7 @@
 iso_install:
   hosts:
     arch_iso:
-      ansible_host: 192.168.122.21
+      ansible_host: 192.168.122.210
       ansible_user: root
       ansible_ssh_pass: root
       install_drive: /dev/vda
@@ -9,7 +9,7 @@ iso_install:
 common:
   hosts:
     arch_vm:
-      ansible_host: 192.168.122.22
+      ansible_host: 192.168.122.186
       hostname: "ArchVM-Test"
     wsl:
       ansible_host: 172.25.55.150

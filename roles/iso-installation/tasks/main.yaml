@@ -1,3 +1,8 @@
+- name: set encryption and btrfs fact
+  set_fact:
+    use_encryption: "{{ encryption is defined and encryption.enabled }}"
+    use_btrfs: "{{ btrfs is defined and btrfs.enabled }}"
+
 - name: Abort if the host is not booted from the Arch install media
   fail:
     msg: "This host is not booted from the Arch install media!"
@@ -6,68 +11,119 @@
 - name: Synchronize clock via NTP
   command: timedatectl set-ntp true
 
-- name: Repartition install drive
-  block:
-    - name: Wipe install drive and all its partitions
-      command: find /dev -wholename "{{ install_drive }}*" -exec wipefs --force --all {} \;
-    - name: Create boot partition
-      parted:
-        device: '{{ install_drive }}'
-        label: gpt
-        number: 1
-        part_end: 512MB
-        name: boot
-        flags: [boot, esp]
-        state: present
-    - name: Create root partition
-      parted:
-        device: '{{ install_drive }}'
-        label: gpt
-        number: 2
-        part_start: 512MB
-        name: root
-        state: present
+- name: Wipe install drive and all its partitions
+  command: find /dev -wholename f"{{ install_drive }}*" -exec wipefs --force --all {} \;
 
-- name: Create filesystems
-  block:
-    - name: Create FAT32 filesystem in boot partition
-      filesystem:
-        dev: '{{ install_drive }}1'
-        fstype: vfat
-        opts: -F32
-        force: yes
-    - name: Create ext4 filesystem in root volume
-      filesystem:
-        dev: '{{ install_drive }}2'
-        fstype: ext4
-        force: yes
-    - name: Get UUID for boot filesystem
-      command: blkid -s UUID -o value '{{ install_drive }}1'
-      register: boot_uuid
-      changed_when: false
-    - name: Get UUID for root filesystem
-      command: blkid -s UUID -o value '{{ install_drive }}2'
-      register: root_uuid
-      changed_when: false
+- name: Create partitions
+  parted:
+    device: '{{ install_drive }}'
+    label: gpt
+    number: 1
+    part_end: 512MB
+    name: boot
+    flags: [boot, esp]
+    state: present
 
-- name: Mount filesystems
+- name: Create root partition
+  parted:
+    device: '{{ install_drive }}'
+    label: gpt
+    number: 2
+    part_start: 512MB
+    name: root
+    state: present
+
+- name: Create FAT32 filesystem in boot partition
+  filesystem:
+    dev: '{{ install_drive }}1'
+    fstype: vfat
+    opts: -F32
+    force: yes
+
+  # Luks1 as grub does not fully support Luks2 yet.
+- name: encrypt drive and mount it
   block:
-    - name: Mount root filesystem
+    - name: copy passphrase encryption file
+      template:
+        src: crypt_password.j2
+        dest: /root/crypt_password
+        owner: "root"
+        group: "root"
+        mode: 0644
+    - name: encrypt drive
+      command: cryptsetup --batch-mode luksFormat --type luks1 {{ install_drive }}2 /root/crypt_password
+    - name: open encrypted drive
+      command: cryptsetup open {{ install_drive }}2 cryptroot --key-file /root/crypt_password
+  when: use_encryption
+
+- name: Create filesystem in root volume
+  filesystem:
+    dev: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+    fstype: '{{ "btrfs" if use_btrfs else "ext4" }}'
+    opts: '-L ArchLinux'
+    force: yes
+
+- name: Mount root filesystem
+  mount:
+    path: /mnt
+    src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+    fstype: '{{ "btrfs" if use_btrfs else "ext4" }}'
+    state: mounted
+
+- name: create btrfs subvolumes
+  block:
+    - name: create root
+      command: btrfs subvolume create /mnt/@
+    - name: create home
+      command: btrfs subvolume create /mnt/@home
+    - name: create snapshots
+      command: btrfs subvolume create /mnt/@snapshots
+    - name: unmount /mnt
       mount:
         path: /mnt
-        src: UUID={{ root_uuid.stdout }}
-        fstype: ext4
-        state: mounted
-    - name: Create mountpoint for boot volume
-      file:
-        path: /mnt/boot
-        state: directory
-    - name: Mount boot filesystem
+        state: unmounted
+    - name: mount btrfs subvolumes
       mount:
-        path: /mnt/boot
-        src: UUID={{ boot_uuid.stdout }}
-        fstype: vfat
+        path: /mnt
+        src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+        fstype: btrfs
+        opts: "compress=zstd,subvol=@"
         state: mounted
+    - name: Create mountpoint for home volume
+      file:
+        path: /mnt/home
+        state: directory
+    - name: Create mountpoint for snapshots volume
+      file:
+        path: /mnt/.snapshots
+        state: directory
+    - name: mount btrfs subvolumes
+      mount:
+        path: /mnt/home
+        src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+        fstype: btrfs
+        opts: "compress=zstd,subvol=@home"
+        state: mounted
+    - name: mount btrfs subvolumes
+      mount:
+        path: /mnt/.snapshots
+        src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+        fstype: btrfs
+        opts: "compress=zstd,subvol=@snapshots"
+        state: mounted
+  when: use_btrfs
+
+- name: Create mountpoint for boot volume
+  file:
+    path: /mnt/boot/efi
+    state: directory
+
+- name: Mount boot filesystem
+  mount:
+    path: /mnt/boot/efi
+    src: "{{ install_drive }}1"
+    fstype: vfat
+    state: mounted
 
 - name: Rank Arch mirrors
   block:
@@ -82,7 +138,7 @@
         warn: false
 
 - name: Run pacstrap
-  command: pacstrap /mnt base base-devel linux linux-firmware efibootmgr grub openssh sudo networkmanager
+  command: pacstrap /mnt base base-devel linux linux-firmware efibootmgr grub openssh sudo networkmanager btrfs-progs grub-btrfs
   tags:
     - pacstrap
 
@@ -96,26 +152,8 @@
 
 - name: Generate fstab
   block:
-    - name: Generate blank fstab
-      command: genfstab -U /mnt >> /mnt/etc/fstab
-    - name: Add root volume to fstab
-      mount:
-        fstab: /mnt/etc/fstab
-        path: /
-        src: UUID={{ root_uuid.stdout }}
-        fstype: ext4
-        opts: defaults
-        passno: '1'
-        state: present
-    - name: Add boot volume to fstab
-      mount:
-        fstab: /mnt/etc/fstab
-        path: /boot
-        src: UUID={{ boot_uuid.stdout }}
-        fstype: vfat
-        opts: defaults
-        passno: '2'
-        state: present
+    - name: Generate fstab file
+      shell: genfstab -U /mnt > /mnt/etc/fstab
 
 - name: Set local timezone
   command: arch-chroot /mnt ln -sf /usr/share/zoneinfo/{{ timezone }} /etc/localtime
@@ -145,12 +183,42 @@
 - name: Enable sshd
   command: arch-chroot /mnt systemctl enable sshd
 
-- name: Set up grub
-  block:
-    - name: Install grub
-      command: arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-    - name: Create grub config
-      command: arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+- name: setup ramdisk for btrfs
+  lineinfile:
+    dest: /mnt/etc/mkinitcpio.conf
+    regexp: ^BINARIES
+    line: 'BINARIES=(btrfs)'
+  when: use_btrfs
+  register: ramdisk1
+
+- name: setup ramdisk for disk encryption
+  lineinfile:
+    dest: /mnt/etc/mkinitcpio.conf
+    regexp: ^HOOKS=
+    line: 'HOOKS=(base udev autodetect modconf block encrypt filesystems keyboard fsck)'
+  when: use_encryption
+  register: ramdisk2
+
+- name: recreate ramdisk
+  command: arch-chroot /mnt mkinitcpio -p linux
+  when: ramdisk1.changed or ramdisk2.changed
+
+- name: setup grub for encryption
+  lineinfile:
+    dest: /mnt/etc/default/grub
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  loop:
+    - { regex: "^#?GRUB_ENABLE_CRYPTODISK", line: "GRUB_ENABLE_CRYPTODISK=y"}
+    - { regex: "^#?GRUB_CMDLINE_LINUX", line: 'GRUB_CMDLINE_LINUX="cryptdevice={{ install_drive }}2:cryptroot:allow-discards"'}
+    - { regex: "^#?GRUB_CMDLINE_LINUX_DEFAULT", line: 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3"'}
+  when: use_encryption
+
+- name: Install grub
+  command: arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+
+- name: Create grub config
+  command: arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 - name: Setup user account
   block:
