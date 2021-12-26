@@ -13,8 +13,11 @@
         path: /mnt/crypto_keyfile.bin
         size: 2 MiB
         source: /dev/urandom
-    - name: add cryptkey to Luks
-      command: cryptsetup luksAddKey {{ install_drive }}2 /mnt/crypto_keyfile.bin --key-file /root/crypt_password
+    - name: encrypt drive
+      community.crypto.luks_device:
+        device: "{{ install_drive }}2"
+        passphrase: "{{ encryption.password }}"
+        new_keyfile: /mnt/crypto_keyfile.bin
     - name: setup ramdisk for disk encryption
       lineinfile:
         dest: /mnt/etc/mkinitcpio.conf

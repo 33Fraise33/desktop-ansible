@@ -1,13 +1,7 @@
-- name: copy passphrase encryption file
-  template:
-    src: crypt_password.j2
-    dest: /root/crypt_password
-    owner: "root"
-    group: "root"
-    mode: 0644
-
 - name: encrypt drive
-  command: cryptsetup --batch-mode luksFormat --type luks1 {{ install_drive }}2 /root/crypt_password
-  
-- name: open encrypted drive
-  command: cryptsetup open {{ install_drive }}2 cryptroot --key-file /root/crypt_password
+  community.crypto.luks_device:
+    device: "{{ install_drive }}2"
+    state: "opened"
+    name: cryptroot
+    type: luks1
+    passphrase: "{{ encryption.password }}"
