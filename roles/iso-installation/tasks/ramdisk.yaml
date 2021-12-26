@@ -6,14 +6,29 @@
   when: use_btrfs
   register: ramdisk1
 
-- name: setup ramdisk for disk encryption
-  lineinfile:
-    dest: /mnt/etc/mkinitcpio.conf
-    regexp: ^HOOKS=
-    line: 'HOOKS=(base udev autodetect modconf block encrypt filesystems keyboard fsck)'
+- name: run encryption items for ramdisk if needed
+  block:
+    - name: create random file for boot decryption
+      community.general.filesize:
+        path: /mnt/crypto_keyfile.bin
+        size: 2 MiB
+        source: /dev/urandom
+    - name: add cryptkey to Luks
+      command: cryptsetup luksAddKey {{ install_drive }}2 /mnt/crypto_keyfile.bin --key-file /root/crypt_password
+    - name: setup ramdisk for disk encryption
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.conf
+        regexp: ^HOOKS=
+        line: 'HOOKS=(base udev autodetect modconf block encrypt filesystems keyboard fsck)'
+      register: ramdisk2
+    - name: setup ramdisk for encryption file
+      lineinfile:
+        dest: /mnt/etc/mkinitcpio.conf
+        regexp: ^FILES=
+        line: 'FILES=(/crypto_keyfile.bin)'
+      register: ramdisk3
   when: use_encryption
-  register: ramdisk2
 
 - name: recreate ramdisk
   command: arch-chroot /mnt mkinitcpio -p linux
-  when: ramdisk1.changed or ramdisk2.changed
+  when: ramdisk1.changed or ramdisk2.changed or ramdisk3.changed
