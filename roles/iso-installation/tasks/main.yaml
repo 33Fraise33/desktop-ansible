@@ -1,3 +1,6 @@
+# Most steps taking from the install guide at:
+# https://wiki.archlinux.org/title/installation_guide#Acquire_an_installation_image
+
 - name: set encryption and btrfs fact
   set_fact:
     use_encryption: "{{ encryption is defined and encryption.enabled }}"

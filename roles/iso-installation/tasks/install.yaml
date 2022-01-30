@@ -3,6 +3,8 @@
     name:
       - pacman-contrib
     update_cache: yes
+
+#https://wiki.archlinux.org/title/mirrors#Fetching_and_ranking_a_live_mirror_list
 - name: Use rankmirrors to filter the fastest mirrors that support HTTPS
   shell: curl -s "https://archlinux.org/mirrorlist/?country=BE&country=FR&country=DE&country=NL&country=GB&protocol=https&ip_version=4&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
   args:

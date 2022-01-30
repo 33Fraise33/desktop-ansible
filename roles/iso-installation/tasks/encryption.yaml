@@ -1,3 +1,4 @@
+#LUKS1 because of grub: https://wiki.archlinux.org/title/GRUB#Encrypted_/boot
 - name: encrypt drive
   community.crypto.luks_device:
     device: "{{ root_part }}"

@@ -1,3 +1,4 @@
+# https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system
 - name: Create filesystem in root volume
   filesystem:
     dev: '{{ "/dev/mapper/cryptroot" if use_encryption else root_part }}'
