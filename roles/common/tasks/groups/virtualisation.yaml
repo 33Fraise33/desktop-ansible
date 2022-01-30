@@ -1,0 +1,17 @@
+- name: VIRTUALISATION - Force remove clashing apps
+  pacman:
+    name:
+      - iptables # (conflicts with iptables-nft needed for libvirt)
+    force: yes
+    state: absent
+  become: true
+
+- name: VIRTUALISATION - Install apps
+  aur:
+    name:
+      - bridge-utils # for libvirt & gns3
+      - cockpit # allows for vm management in a webinterface TODO: secure webinterface
+      - dnsmasq # needed for libvirt natting
+      - iptables-nft # needed for libvirt natting
+      - libvirt # enhanced vm platform (running on top of qemu)
+      - qemu # vm platform

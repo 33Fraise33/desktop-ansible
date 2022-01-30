@@ -1,0 +1,19 @@
+- name: NETWORKING - Install apps
+  aur:
+    name:
+      - bmon # network interface monitoring
+      - fping # fping -g 172.16.50.0/24
+      - inetutils # telnet
+      - iperf3 # throughput tests
+      - lldpd # network discovery
+      - mactelnet # mndp
+      - modemmanager # for connecting modems
+      - mtr # my traceroute
+      - nmap # portscans and much more
+      - picocom # serial client
+      - sipcalc # sipcalc 172.21.142.64/28
+      - speedtest-cli # speedtest in terminal
+      - wget # get the www
+      - whois # info on domain owner
+      - wireguard-tools # used to create wireguard tunnel
+      - wpa_supplicant # use for wifi connection

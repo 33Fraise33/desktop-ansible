@@ -1,84 +1,37 @@
-- name: force remove iptables (conflicts with iptables-nft needed for libvirt)
-  pacman:
-    name:
-      - iptables
-    force: yes
-    state: absent
-  become: true
-
-- name: install terminal apps
+- name: TERMINAL - install terminal apps
   aur:
     name:
       - android-tools # adb & fastboot
-      - ansible # well you are running this playbook with it ¯\_(ツ)_/¯
-      - bmon # network interface monitoring
-      - bridge-utils # for libvirt & gns3
       - cups # printing services
-      - docker # apps containerized
-      - docker-compose # easy containerized file format
       - dmidecode # bios info
-      - dnsmasq # needed for libvirt natting
-      - iptables-nft # needed for libvirt natting
-      - fping # fping -g 172.16.50.0/24
       - fwupd # fwupdmgr get-devices
       - glances # glances (htop replacement)
       - htop # hardware usage/processes in cli
-      - inetutils # telnet
-      - iperf3 # throughput tests
-      - lldpd # network discovery
-      - mactelnet # mndp
-      - modemmanager # for connecting modems
-      - mtr # my traceroute
-      - ncdu # storage info
+      - gdu # storage info (ncdu alternative)
       - neofetch # pretty sys info
-      - nmap # portscans and much more
       - oh-my-zsh-git # zsh the way it should be
       - paru-bin # aur helper
-      - picocom # serial client
       - powerline-fonts-git # fonts for terminator
       - powertop # info on powerusage
-      - sipcalc # sipcalc 172.21.142.64/28
-      - speedtest-cli # speedtest in terminal
-      - sshpass # used for ansible
       - syncthing # sync config files
       - tlp # battery life optimizations (install and forget)
       - unzip # opisite of zip
       - usbutils # lsusb
-      - nvim # vim on steroids
-      - wget # get the www
-      - whois # info on domain owner
-      - wireguard-tools # used to create wireguard tunnel
-      - wpa_supplicant # use for wifi connection
+      - neovim # vim on steroids
       - youtube-dl # download videos from the net
       - zsh # shell
 
-- name: enable services
-  systemd:
-    name: "{{ item }}"
-    state: restarted
-    enabled: yes
-  become: true
-  loop:
+- name: TERMINAL - Install app groups
+  include_tasks: "groups/{{ item }}.yaml"
+  tags: always
+  loop: 
+    - ansible
     - docker
-
-- name: change docker default subnet
-  copy:
-    src: daemon.json
-    dest: /etc/docker/daemon.json
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart docker
-  become: true
+    - networking
+    - virtualisation
 
 ##### needed for a new install (already have .zshrc in syncthing)
 # - name: setup oh-my-zsh
 #   shell: /usr/share/oh-my-zsh/tools/install.sh --unattended
 #   args:
 #     creates: /home/{{ user.name }}/.oh-my-zsh
-
-- name: set default shell of user to zsh
-  user:
-    name: "{{ user.name }}"
-    shell: /bin/zsh
-  become: true

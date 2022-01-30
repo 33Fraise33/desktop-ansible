@@ -1,0 +1,22 @@
+- name: DOCKER - Install apps
+  aur:
+    name:
+      - docker # apps containerized
+      - docker-compose # easy containerized file format
+
+- name: DOCKER - Enable services
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  become: true
+
+- name: DOCKER - Change default subnet
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart docker
+  become: true

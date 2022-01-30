@@ -1,4 +1,4 @@
-- import_tasks: 01-system.yml
+- import_tasks: 01-system.yaml
   tags: system, arm_setup
 
 - import_tasks: 02-user.yaml
