@@ -22,6 +22,9 @@ Change the variables you want under group_vars or the inventory file. (depending
   - `password`: encryption password, a random key will be generated for system load so you only have to enter your encryption password once
 - `btrfs`: have the option to use btrfs as filesystem (includes subvolumes)
   - `enabled`: true or false
+  - `subvols`: list containing subvol name and map location
+    - `sub`: i.e. @log
+    - `path`: i.e. var/log
 - `manual_partitions`: override default wipe behaviour (both options necessary, you may overwrite an existing boot partition if wanted)
   - `boot`: set custom boot partition location (i.e. nvme0n1p1)
   - `root`: set custom root partition locatoin (i.e. nvme0n1p3)

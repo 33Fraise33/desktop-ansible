@@ -24,12 +24,24 @@ encryption:
         36633963613661376637393966616366646461656661303538663132353538393261323330356466
         3534616566636263390a663565323036663436646263613637383134366238336634656130393537
         3133
+        
 btrfs:
   enabled: true
+  subvols: 
+    - sub: '@snapshots'
+      path: '.snapshots'
+    - sub: '@home'
+      path: 'home'
+    - sub: '@log'
+      path: 'var/log'
+    - sub: '@cache'
+      path: 'var/cache'
+    - sub: '@tmp'
+      path: 'var/tmp'
 
-manual_partitions:
-  - boot: vda1
-  - root: vda2
+# manual_partitions:
+#   - boot: vda1
+#   - root: vda2
 
 syncthing:
   api_key: !vault |

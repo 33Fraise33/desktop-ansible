@@ -1,11 +1,11 @@
 # https://wiki.archlinux.org/title/btrfs
 
 - name: create root
-  command: btrfs subvolume create /mnt/{{ item }}
-  loop:
-    - "@"
-    - "@home"
-    - "@snapshots"
+  command: btrfs subvolume create /mnt/@
+
+- name: create other subvols
+  command: btrfs subvolume create /mnt/{{ item.sub }}
+  loop: "{{ btrfs.subvols }}"
 
 - name: unmount /mnt
   mount:
@@ -24,9 +24,7 @@
   file:
     path: /mnt/{{ item.path }}
     state: directory
-  loop:
-    - { sub: '@snapshots', path: '.snapshots'}
-    - { sub: '@home', path: 'home'}
+  loop: "{{ btrfs.subvols }}"
 
 - name: mount btrfs subvolumes
   mount:
@@ -35,6 +33,5 @@
     fstype: btrfs
     opts: "compress=zstd,subvol={{ item.sub }}"
     state: mounted
-  loop:
-    - { sub: '@snapshots', path: '.snapshots'}
-    - { sub: '@home', path: 'home'}
+  loop: "{{ btrfs.subvols }}"
+
