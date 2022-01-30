@@ -1,6 +1,6 @@
 - name: encrypt drive
   community.crypto.luks_device:
-    device: "{{ install_drive }}2"
+    device: "{{ root_part }}"
     state: "opened"
     name: cryptroot
     type: luks1

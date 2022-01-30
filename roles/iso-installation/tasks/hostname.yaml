@@ -1,0 +1,16 @@
+- name: set hostname
+  lineinfile:
+    line: "{{ hostname }}"
+    path: /mnt/etc/hostname
+    owner: root
+    group: root
+    mode: 0644
+    create: true
+
+- name: set hostname in hosts file
+  template:
+    src: hosts.j2
+    dest: /mnt/etc/hosts
+    owner: root
+    group: root
+    mode: 0644

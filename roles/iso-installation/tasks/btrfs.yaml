@@ -13,7 +13,7 @@
 - name: mount btrfs root subvolume
   mount:
     path: /mnt
-    src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+    src: '{{ "/dev/mapper/cryptroot" if use_encryption else root_part }}'
     fstype: btrfs
     opts: "compress=zstd,subvol=@"
     state: mounted
@@ -25,11 +25,11 @@
   loop:
     - { sub: '@snapshots', path: '.snapshots'}
     - { sub: '@home', path: 'home'}
-    
+
 - name: mount btrfs subvolumes
   mount:
     path: /mnt/{{ item.path }}
-    src: '{{ "/dev/mapper/cryptroot" if use_encryption else install_drive + "2" }}'
+    src: '{{ "/dev/mapper/cryptroot" if use_encryption else root_part }}'
     fstype: btrfs
     opts: "compress=zstd,subvol={{ item.sub }}"
     state: mounted

@@ -22,6 +22,9 @@ Change the variables you want under group_vars or the inventory file. (depending
   - `password`: encryption password, a random key will be generated for system load so you only have to enter your encryption password once
 - `btrfs`: have the option to use btrfs as filesystem (includes subvolumes)
   - `enabled`: true or false
+- `manual_partitions`: override default wipe behaviour (both options necessary, you may overwrite an existing boot partition if wanted)
+  - `boot`: set custom boot partition location (i.e. nvme0n1p1)
+  - `root`: set custom root partition locatoin (i.e. nvme0n1p3)
 - `hostname`: sets hostname for networking
 - `timezone`: timezone to set on the host
 

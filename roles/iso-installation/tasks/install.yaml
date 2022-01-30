@@ -7,9 +7,9 @@
   shell: curl -s "https://archlinux.org/mirrorlist/?country=BE&country=FR&country=DE&country=NL&country=GB&protocol=https&ip_version=4&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
   args:
     warn: false
-    
+
 - name: Run pacstrap
-  command: pacstrap /mnt base base-devel linux linux-firmware efibootmgr grub openssh sudo networkmanager btrfs-progs grub-btrfs
+  command: pacstrap /mnt base base-devel linux linux-firmware efibootmgr grub openssh sudo networkmanager btrfs-progs grub-btrfs os-prober
   tags:
     - pacstrap
 

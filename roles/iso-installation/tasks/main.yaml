@@ -2,6 +2,9 @@
   set_fact:
     use_encryption: "{{ encryption is defined and encryption.enabled }}"
     use_btrfs: "{{ btrfs is defined and btrfs.enabled }}"
+    root_part: "{{ manual_partitions.root | default(install_drive + '2')}}"
+    boot_part: "{{ manual_partitions.boot | default(install_drive + '1')}}"
+    hostname: "{{ hostname | default(inventory_hostname | replace('_','-'))}}"
 
 - name: Abort if the host is not booted from the Arch install media
   fail:
@@ -33,7 +36,7 @@
 - name: Mount boot filesystem
   mount:
     path: /mnt/boot/efi
-    src: "{{ install_drive }}1"
+    src: "{{ boot_part }}"
     fstype: vfat
     state: mounted
 
@@ -56,6 +59,9 @@
 
 - import_tasks: ramdisk.yaml
   tags: ramdisk
+
+- import_tasks: hostname.yaml
+  tags: hostname
 
 - import_tasks: grub.yaml
   tags: grub

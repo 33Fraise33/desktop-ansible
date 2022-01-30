@@ -5,12 +5,13 @@
     line: "{{ item.line }}"
   loop:
     - { regex: "^#?GRUB_ENABLE_CRYPTODISK", line: "GRUB_ENABLE_CRYPTODISK=y"}
-    - { regex: "^#?GRUB_CMDLINE_LINUX", line: 'GRUB_CMDLINE_LINUX="cryptdevice={{ install_drive }}2:cryptroot:allow-discards"'}
+    - { regex: "^#?GRUB_CMDLINE_LINUX", line: 'GRUB_CMDLINE_LINUX="cryptdevice={{ root_part }}:cryptroot:allow-discards"'}
     - { regex: "^#?GRUB_CMDLINE_LINUX_DEFAULT", line: 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3"'}
+    - { regex: "^#?GRUB_DISABLE_OS_PROBER", line: "GRUB_DISABLE_OS_PROBER=false"}
   when: use_encryption
 
 - name: Install grub
-  command: arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+  command: arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB-ARCH
 
 - name: Create grub config
   command: arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg

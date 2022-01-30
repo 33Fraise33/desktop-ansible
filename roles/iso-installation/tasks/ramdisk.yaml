@@ -15,7 +15,7 @@
         source: /dev/urandom
     - name: encrypt drive
       community.crypto.luks_device:
-        device: "{{ install_drive }}2"
+        device: "{{ root_part }}"
         passphrase: "{{ encryption.password }}"
         new_keyfile: /mnt/crypto_keyfile.bin
     - name: setup ramdisk for disk encryption
