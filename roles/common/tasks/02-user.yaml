@@ -1,16 +1,16 @@
-- name: Create user account
+- name: USER - Create account
   user:
     name: "{{ user.name }}"
     comment: "{{ user.full }}"
     groups: wheel
     append: yes
-    shell: /bin/bash
+    shell: /bin/zsh
     password: "{{ user.password | string | password_hash('sha512') }}"
     update_password: on_create
   become: true
   tags: arm_setup
 
-- name: set authorized_keys
+- name: USER - Set authorized_keys
   authorized_key:
     user: "{{ user.name }}"
     state: present
@@ -18,21 +18,24 @@
   become: true
   tags: arm_setup
 
-- name: change ssh configs
+- name: USER - Change SSH daemon settings
   lineinfile:
     path: /etc/ssh/sshd_config
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
+    validate: 'sshd -t -f %s'
   become: true
-  with_items:
-    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no'}
-    - { regexp: '^UsePAM ', line: 'UsePAM no'}
-    - { regexp: '^PasswordAuthentication ', line: 'PasswordAuthentication no'}
+  loop:
+    - { regexp: '^(# *)?PermitRootLogin', line: 'PermitRootLogin no'}
+    - { regexp: '^(# *)?UsePAM ', line: 'UsePAM yes'}
+    - { regexp: '^(# *)?PasswordAuthentication ', line: 'PasswordAuthentication no'}
+    - { regexp: '^(# *)?PermitEmptyPasswords ', line: 'PermitEmptyPasswords no'}
+    - { regexp: '^(# *)?ChallengeResponseAuthentication ', line: 'ChallengeResponseAuthentication no'}
   notify:
     - restart sshd
   tags: arm_setup
 
-- name: remove alarm user on arm arch
+- name: USER - remove alarm user on arm arch
   user:
     name: "alarm"
     state: absent
@@ -41,7 +44,7 @@
   become: true
   tags: arm_setup
 
-- name: update root account password (when running from arm arch root account has default password)
+- name: USER - update root account password (when running from arm arch, root account has default password)
   user:
     name: "root"
     password: "{{ user.password | string | password_hash('sha512') }}"

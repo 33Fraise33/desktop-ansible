@@ -1,20 +1,19 @@
-- name: Rank Arch mirrors
-  block:
-    - name: Install the pacman-contrib package (for rankmirrors)
-      pacman:
-        name:
-          - pacman-contrib
-        update_cache: yes
-    - name: Use rankmirrors to filter the fastest mirrors that support HTTPS
-      shell: curl -s "https://archlinux.org/mirrorlist/?country=BE&country=FR&country=DE&country=NL&country=GB&protocol=https&ip_version=4&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
-      args:
-        warn: false
+- block:
+  - name: PACMAN - Install the pacman-contrib package (for rankmirrors)
+    pacman:
+      name:
+        - pacman-contrib
+      update_cache: yes
+  - name: PACMAN - Use rankmirrors to filter the fastest mirrors that support HTTPS
+    shell: curl -s "https://archlinux.org/mirrorlist/?country=BE&country=FR&country=DE&country=LU&country=NL&country=GB&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
+    args:
+      warn: false
   become: true
   tags:
     - mirrors
   when: ansible_architecture != "aarch64"
 
-- name: create pacman mirrorlist for arm
+- name: PACMAN - Create mirrorlist for arm
   copy:
     dest: /etc/pacman.d/mirrorlist
     owner: root
@@ -25,23 +24,30 @@
   become: true
   when: ansible_architecture == "aarch64"
 
-- name: copy pacman config
-  template:
-    src: pacman.conf.j2
+- name: PACMAN - Set config items
+  lineinfile:
+    path: /etc/pacman.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  become: true
+  loop:
+    - { regexp: '^(# *)?Color', line: 'Color'}
+
+- name: PACMAN - Enable multilib
+  replace:
     dest: /etc/pacman.conf
-    owner: root
-    group: root
-    mode: 644
+    regexp: '\#\[multilib\]\n\#Include = /etc/pacman\.d/mirrorlist'
+    replace: '[multilib]\nInclude = /etc/pacman.d/mirrorlist'
   become: true
 
-- name: disable compression of makepkg (aur packages)
+- name: PACMAN - Disable compression of makepkg (aur packages)
   lineinfile:
     dest: /etc/makepkg.conf
     regexp: '^PKGEXT='
     line: "PKGEXT='.pkg.tar'"
   become: true
 
-- name: install git & base-devel
+- name: PACMAN - Install git & base-devel
   pacman:
     name:
       - git
@@ -50,7 +56,7 @@
     state: present
   become: true
 
-- name: install paru
+- name: PACMAN - Install paru
   aur:
     use: makepkg
     name: paru-bin

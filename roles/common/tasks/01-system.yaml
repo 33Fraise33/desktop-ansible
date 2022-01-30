@@ -1,4 +1,4 @@
-- name: install default packages
+- name: SYSTEM - Install default packages
   pacman:
     name:
       - sudo
@@ -7,21 +7,22 @@
       - base
       - base-devel
       - networkmanager
+      - zsh
     update_cache: yes
   become: true
 
-- name: Give passwordless sudo access to wheel group
+- name: SYSTEM - Give passwordless sudo access to wheel group
   copy:
     content: '%wheel ALL=(ALL) NOPASSWD: ALL'
     dest: /etc/sudoers.d/wheel
     validate: /usr/sbin/visudo --check --file=%s
   become: true
 
-- name: sync time to ntp server
+- name: SYSTEM - Sync time to ntp server
   command: ntpdate -u pool.ntp.org
   become: true
 
-- name: start & enable services
+- name: SYSTEM - Start & enable services
   systemd:
     name: "{{ item }}"
     state: started
@@ -32,14 +33,14 @@
     - NetworkManager
   become: true
 
-- name: stop & disable networkd
+- name: SYSTEM - Stop & disable networkd
   systemd:
     name: systemd-networkd
     state: stopped
     enabled: no
   become: true
 
-- name: Install intel-ucode
+- name: SYSTEM - Install intel-ucode if needed
   pacman:
     name:
       - intel-ucode # ucode for intel cpus
@@ -48,7 +49,7 @@
   when: ansible_processor[1].find('Intel') != -1
   become: true
 
-- name: Install amd-ucode
+- name: SYSTEM - Install amd-ucode if needed
   pacman:
     name:
       - amd-ucode # ucode for amd
@@ -58,30 +59,30 @@
   when: ansible_processor[1].find('AMD') != -1
   become: true
 
-- name: Install inetutils for hostname set
+- name: SYSTEM - Install inetutils for hostname set
   pacman:
     name:
       - inetutils
   become: true
 
-- name: set hostname
+- name: SYSTEM - Set hostname
   hostname:
     name: "{{ hostname }}"
   become: true
 
-- name: set hostname in hosts file
+- name: SYSTEM - Set hostname in hosts file
   lineinfile:
     dest: /etc/hosts
     regexp: ^127.0.1.1
-    line: '127.0.1.1 {{ hostname }} {{ hostname }}.localdomain'
+    line: '127.0.1.1        {{ hostname }} {{ hostname }}.localdomain'
   become: true
 
-- name: generate en_US locale
+- name: SYSTEM - Generate en_US locale
   lineinfile:
     dest: /etc/locale.gen
     line: 'en_US.UTF-8 UTF-8'
   become: true
 
-- name: generate locales
+- name: SYSTEM - generate locales
   command: locale-gen
   become: true
