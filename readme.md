@@ -57,3 +57,13 @@ Run before ansible:
 - https://github.com/yuk7/ArchWSL/wiki/How-to-Setup
 - pacman -S openssh
 - systemctl start sshd
+
+# TODO: 
+- disable QoW for QEMU images
+  - https://wiki.archlinux.org/title/btrfs#Disabling_CoW => specifically on a certain directory
+- enable scrubbing
+  - https://wiki.archlinux.org/title/btrfs#Scrub
+- automatic snapshotting
+  - https://wiki.archlinux.org/title/Snapper
+- enable grub-btrfs for snapshot boot
+  - https://archlinux.org/packages/?name=grub-btrfs
