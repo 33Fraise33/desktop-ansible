@@ -1,22 +1,24 @@
 - name: DOCKER - Install apps
   aur:
     name:
-      - docker # apps containerized
-      - docker-compose # easy containerized file format
+      - podman # docker alternative
+      - podman-docker # docker command support for podman
+      - podman-dnsname # enable hostname resolution in docker-compose files
 
-- name: DOCKER - Enable services
+- name: DOCKER - Enable podman service
   systemd:
-    name: docker
+    name: podman
     state: started
     enabled: yes
   become: true
 
-- name: DOCKER - Change default subnet
-  copy:
-    src: daemon.json
-    dest: /etc/docker/daemon.json
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart docker
-  become: true
+# TODO: change default subnet with podman
+# - name: DOCKER - Change default subnet
+#   copy:
+#     src: daemon.json
+#     dest: /etc/docker/daemon.json
+#     owner: root
+#     group: root
+#     mode: 0644
+#   notify: restart docker
+#   become: true

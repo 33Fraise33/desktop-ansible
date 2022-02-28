@@ -2,7 +2,7 @@
     <device id="{{ syncthing.introducer_device_id }}" name="Captain" compression="metadata" introducer="true" skipIntroductionRemovals="false" introducedBy="">
         <address>quic://10.33.0.22:22000</address>
         <address>tcp://10.33.0.22:22000</address>
-        <address>tcp://ironman.frai.se:22000</address>
+        <address>tcp://syncthing.frai.se:22000</address>
         <address>dynamic</address>
         <paused>false</paused>
         <autoAcceptFolders>true</autoAcceptFolders>
@@ -78,6 +78,7 @@
         <sendFullIndexOnUpgrade>false</sendFullIndexOnUpgrade>
         <connectionLimitEnough>0</connectionLimitEnough>
         <connectionLimitMax>0</connectionLimitMax>
+        <insecureAllowOldTLSVersions>false</insecureAllowOldTLSVersions>
     </options>
     <defaults>
         <folder id="" label="" path="~" type="sendreceive" rescanIntervalS="3600" fsWatcherEnabled="true" fsWatcherDelayS="10" ignorePerms="false" autoNormalize="true">

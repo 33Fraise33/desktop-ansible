@@ -1,0 +1,33 @@
+# does only generate a new id when needed
+- name: SYNCTHING - Generate device id
+  command: syncthing -generate=/home/{{ user.name }}/.config/syncthing/
+  changed_when: false
+
+- name: SYNCTHING - Get syncthing device id
+  command: syncthing -device-id
+  register: syncthing_id
+  changed_when: false
+
+- name: SYNCTHING - Copy xml file
+  template:
+    src: syncthing_config.xml.j2
+    dest: /home/{{ user.name }}/.config/syncthing/config.xml
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: 0644
+
+- name: SYNCTHING - Enable & Start systemd service
+  systemd:
+    name: syncthing@{{ user.name }}
+    state: restarted
+    enabled: yes
+  become: true
+
+# - name: symlink all directories to the home directory
+#   shell: '{{ item }}'
+#   args:
+#     warn: false
+#   loop:
+#     - 'ln -sf /home/{{ user.name}}/.dotfiles/.* /home/{{ user.name }}'
+#     - 'ln -sf /home/{{ user.name}}/.dotfiles/.config/* /home/{{ user.name}}/.config'
+#   ignore_errors: yes

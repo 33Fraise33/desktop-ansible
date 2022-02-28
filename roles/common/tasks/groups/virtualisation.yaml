@@ -11,6 +11,7 @@
     name:
       - bridge-utils # for libvirt & gns3
       - cockpit # allows for vm management in a webinterface TODO: secure webinterface
+      - cockpit-machines # libvirt support for cockpit
       - dnsmasq # needed for libvirt natting
       - iptables-nft # needed for libvirt natting
       - libvirt # enhanced vm platform (running on top of qemu)

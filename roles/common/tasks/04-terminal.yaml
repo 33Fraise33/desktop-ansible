@@ -5,17 +5,15 @@
       - cups # printing services
       - dmidecode # bios info
       - fwupd # fwupdmgr get-devices
-      - glances # glances (htop replacement)
       - htop # hardware usage/processes in cli
       - gdu # storage info (ncdu alternative)
       - neofetch # pretty sys info
       - oh-my-zsh-git # zsh the way it should be
       - paru-bin # aur helper
-      - powerline-fonts-git # fonts for terminator
       - powertop # info on powerusage
       - syncthing # sync config files
       - tlp # battery life optimizations (install and forget)
-      - unzip # opisite of zip
+      - unzip # oposite of zip
       - usbutils # lsusb
       - neovim # vim on steroids
       - youtube-dl # download videos from the net
@@ -30,8 +28,9 @@
     - networking
     - virtualisation
 
-##### needed for a new install (already have .zshrc in syncthing)
-# - name: setup oh-my-zsh
-#   shell: /usr/share/oh-my-zsh/tools/install.sh --unattended
-#   args:
-#     creates: /home/{{ user.name }}/.oh-my-zsh
+- name: TERMINAL - Setup app tasks
+  include_tasks: "app_tasks/{{ item }}.yaml"
+  tags: always
+  loop: 
+    - syncthing
+    - terminal
