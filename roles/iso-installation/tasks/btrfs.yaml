@@ -17,7 +17,7 @@
     path: /mnt
     src: '{{ "/dev/mapper/cryptroot" if use_encryption else root_part }}'
     fstype: btrfs
-    opts: "compress=zstd,subvol=@"
+    opts: "compress=zstd,discard=async,subvol=@"
     state: mounted
 
 - name: Create mountpoint for btrfs subvolumes
@@ -31,7 +31,14 @@
     path: /mnt/{{ item.path }}
     src: '{{ "/dev/mapper/cryptroot" if use_encryption else root_part }}'
     fstype: btrfs
-    opts: "compress=zstd,subvol={{ item.sub }}"
+    opts: "compress=zstd,discard=async,subvol={{ item.sub }}"
     state: mounted
   loop: "{{ btrfs.subvols }}"
+
+- name: disable CoW for subvols with disable_cow = true
+  file:
+    path: /mnt/{{ item.path }}
+    attributes: C
+  loop: "{{ btrfs.subvols }}"
+  when: item.disable_cow|default(false)
 

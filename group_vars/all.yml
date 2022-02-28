@@ -38,6 +38,9 @@ btrfs:
       path: 'var/cache'
     - sub: '@tmp'
       path: 'var/tmp'
+    - sub: '@data'
+      path: 'data'
+      disable_cow: true
 
 # manual_partitions:
 #   - boot: vda1
