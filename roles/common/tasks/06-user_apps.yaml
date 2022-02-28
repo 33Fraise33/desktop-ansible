@@ -8,38 +8,46 @@
       - thunderbird
       - cantata
       - k3b
-      - kate
       - kcalc
-      - spectacle
       - yakuake
-      - manjaro-browser-settings
     state: absent
   become: true
 
+- name: force remove clashing apps
+  pacman:
+    name:
+      - ttf-hack
+    force: yes
+    state: absent
+  become: true
+
+
 - name: install user apps
-  aur:
+  kewlfft.aur.aur:
     name:
       - ark # archive manager
       - atom # text editor
       - barrier # network kvm software (mouse and keyboard over the network)
-      - chromium # webbrowser with working hardware acceleration
-      - copyq-git # use git version for wayland fixes
+      - code # text editor / ide (replacemen of atom?)
+      - copyq # TODO: https://copyq.readthedocs.io/en/latest/known-issues.html#on-linux-global-shortcuts-and-pasting-doesn-t-work
       - discord # chat app for gamers
       - dolphin # file explorer
-      - flameshot-git # screenshot tool ( use git as bin has not been updated a lot and wayland fixes)
+      - firefox # work browser
+      - flameshot # screenshot tool
       - freerdp # needed for remmina rdp
+      - gns3-server # network virtualisation tool
+      - gns3-gui # network virtualisation tool frontend
+      - google-chrome # webbrowser
       - google-earth-pro # used for kmz's
       - gparted # gui partition manager
       - gwenview # picture viewer
       - ipscan # angry ip scanner
       - libratbag # service for piper
-      - libvirt # enhanced vm platform (running on top of qemu)
       - libvncserver # needed for remmina vnc
       - mpv # media player
       - obs-studio # capture screens and devices
       - piper # mouse setting utility
-      - pulseaudio-modules-bt # higher quality audio
-      - qemu # vm platform
+      - powerline-fonts-git # fonts for terminator
       - remmina # remote desktop solution for rdp, vnc,...
       - slack-desktop # native slack app
       - spotify # music duuuuh

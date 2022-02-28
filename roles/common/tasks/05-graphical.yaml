@@ -1,5 +1,22 @@
+- name: force remove clashing apps
+  pacman:
+    name:
+      - pulseaudio # conflicts with pipewire dependencies
+      - jack2
+    force: yes
+    state: absent
+  become: true
+
+- name: install pipewire audio backend
+  kewlfft.aur.aur:
+    name:
+      - pipewire # audio backend
+      - pipewire-alsa
+      - pipewire-pulse
+      - pipewire-jack
+
 - name: install KDE apps
-  aur:
+  kewlfft.aur.aur:
     name:
       - arc-gtk-theme # arc gtk theme (arc dark)
       - arc-kde-git # arc theme (arc dark)
@@ -7,18 +24,61 @@
       - papirus-icon-theme # nice icons for arc
       - plasma # kde / plasmashell
       - plasma-wayland-session # wayland support for plasma
-      # - ttf-google-sans # google fond for system (ZIP DOWNLOAD NOT WORKING)
-      - xorg # display server
+      - sddm # display manager, serves login shell
+      - ttf-google-sans # google fond for system (ZIP DOWNLOAD NOT WORKING)
+      - xorg # display server needed for xwayland
 
-- name: install sway apps
-  aur:
-    name:
-      - sway # tiling DE
+# - name: install sway apps
+#   aur:
+#     name:
+#       - sway # tiling DE
+#       - xorg-xwayland # xorg compatibility layer for wayland
+#       - waybar # status bar
+#       - otf-font-awesome # waybar icons
+#       - xdg-desktop-portal-wlr # desktop capture in wayland
+#       # - ttf-google-sans # google fond for system (ZIP DOWNLOAD NOT WORKING)
+#       # - papirus-icon-theme # nice icons for arc
+#       # - arc-gtk-theme # arc gtk theme (arc dark)
+
+# - name: create config directory
+#   file:
+#     path: /home/{{ user.name }}/.config/{{ item }}
+#     state: directory
+#     owner: gianni
+#     group: gianni
+#     mode: 0755
+#     recurse: yes
+#   loop:
+#     - sway
+#     - waybar
+# - name: copy sway config
+#   copy:
+#     src: "config/{{ item }}"
+#     dest: /home/{{ user.name }}/.config/{{ item }}/config
+#     owner: gianni
+#     group: gianni
+#     mode: 0644
+#   loop:
+#     - sway
+#     - waybar
 
 - name: enable sddm login
   systemd:
     name: sddm
     enabled: yes
+  become: true
+
+- name: set style in sddm
+  blockinfile:
+    path: /etc/sddm.conf.d/kde_settings.conf
+    create: true
+    mode: 0644
+    owner: root
+    group: root
+    block: |
+      [Theme]
+      Current=breeze
+      CursorTheme=breeze_cursors
   become: true
 
 # - name: set kde settings
@@ -96,12 +156,3 @@
 #         regexp: '^Theme='
 #         insertafter: '^[Greeter]'
 #         line: 'Theme=com.github.varlesh.arc-dark'
-#     - name: set style in sddm
-#       lineinfile:
-#         dest: /etc/sddm.conf.d/kde_settings.conf
-#         regexp: '{{ item.regexp }}'
-#         line: '{{ item.line }}'
-#       with_items:
-#         - { line: 'Current=breeze', regexp: '^Current='}
-#         - { line: 'CursorTheme=breeze_cursors', regexp: '^CursorTheme='}
-#       become: true
