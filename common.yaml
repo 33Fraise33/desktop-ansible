@@ -10,5 +10,4 @@
 
 - hosts: common
   roles:
-    - kewlfft.aur
     - common

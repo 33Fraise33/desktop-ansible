@@ -1,5 +1,5 @@
 - name: DOCKER - Install apps
-  aur:
+  kewlfft.aur.aur:
     name:
       - podman # docker alternative
       - podman-docker # docker command support for podman

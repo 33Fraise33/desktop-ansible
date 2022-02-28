@@ -40,7 +40,7 @@
     replace: '[multilib]\nInclude = /etc/pacman.d/mirrorlist'
   become: true
 
-- name: PACMAN - Disable compression of makepkg (aur packages)
+- name: PACMAN - Disable compression of makepkg (aur packages) 
   lineinfile:
     dest: /etc/makepkg.conf
     regexp: '^PKGEXT='
@@ -57,7 +57,7 @@
   become: true
 
 - name: PACMAN - Install paru
-  aur:
+  kewlfft.aur.aur:
     use: makepkg
     name: paru-bin
     state: present

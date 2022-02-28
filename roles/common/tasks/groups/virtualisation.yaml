@@ -7,7 +7,7 @@
   become: true
 
 - name: VIRTUALISATION - Install apps
-  aur:
+  kewlfft.aur.aur:
     name:
       - bridge-utils # for libvirt & gns3
       - cockpit # allows for vm management in a webinterface TODO: secure webinterface

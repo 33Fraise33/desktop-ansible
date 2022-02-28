@@ -1,5 +1,5 @@
 - name: ANSIBLE - Install apps
-  aur:
+  kewlfft.aur.aur:
     name:
       - ansible # well you are running this playbook with it ¯\_(ツ)_/¯
       - sshpass # used for ansible when using -k

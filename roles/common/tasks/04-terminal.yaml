@@ -1,5 +1,5 @@
 - name: TERMINAL - install terminal apps
-  aur:
+  kewlfft.aur.aur:
     name:
       - android-tools # adb & fastboot
       - cups # printing services

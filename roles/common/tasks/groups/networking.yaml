@@ -1,5 +1,5 @@
 - name: NETWORKING - Install apps
-  aur:
+  kewlfft.aur.aur:
     name:
       - bmon # network interface monitoring
       - fping # fping -g 172.16.50.0/24

@@ -13,7 +13,7 @@ user:
         3133
   full: 'Gianni Stubbe'
   email: gianni.stubbe@citymesh.com
-  pub_key_location: "{{ lookup('env', 'HOME') }}/.ssh/personal/gianniKey.pub"
+  pub_key_location: "/data/syncthing/Documents/dotfiles/ssh/personal/gianniKey.pub"
 
 encryption:
   enabled: true

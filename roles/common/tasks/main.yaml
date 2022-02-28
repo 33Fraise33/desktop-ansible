@@ -8,7 +8,7 @@
   tags: pacman
 
 - name: upgrade all packages
-  aur:
+  kewlfft.aur.aur:
     upgrade: yes
   tags: upgrade
 
@@ -21,11 +21,4 @@
 
 - import_tasks: 06-user_apps.yaml
   tags: user_apps
-  when: ansible_architecture != "aarch64"
-
-- import_tasks: 07-syncthing.yaml
-  tags: syncthing
-
-- import_tasks: 08-printing.yml
-  tags: printing
   when: ansible_architecture != "aarch64"
